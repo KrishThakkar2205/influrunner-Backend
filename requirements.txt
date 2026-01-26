@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+sqlalchemy
+dotenv
+psycopg2-binary
+bcrypt
+uuid
+smtp-mail
+python-jose[cryptography]

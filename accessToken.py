@@ -2,6 +2,8 @@ from datetime import datetime, timedelta
 from jose import jwt, JWTError
 from dotenv import load_dotenv
 import os
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi import Depends
 
 load_dotenv()
 
@@ -14,6 +16,12 @@ def CreateAccessToken(profile_id):
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+
+def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(HTTPBearer())
+):
+    token = credentials.credentials
+    return token
 
 def VerifyAccessToken(token):
     try:

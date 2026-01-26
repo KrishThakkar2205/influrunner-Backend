@@ -1,11 +1,13 @@
-from accessToken import CreateAccessToken
+from accessToken import CreateAccessToken, VerifyAccessToken, get_current_user
 from fastapi import FastAPI, Request, Response, Depends
 from database import get_db
 from sqlalchemy.orm import Session
-from databaseAccess import AddInfluencers, VerifyOTP, FinalSignup, Login
-from schema.auth import SignupInitiate, VerifyOtp, SignupFinal, LoginSchema
+from databaseAccess import AddInfluencers, VerifyOTP, FinalSignup, Login, GetProfile, AddShoot, GetShoots, UpdateShoot, DeleteShoot
+from schema.auth import SignupInitiate, VerifyOtp, SignupFinal, LoginSchema, ShootCreate, ShootUpdate
 from maiService import send_otp_email
-from accessToken import CreateAccessToken
+from accessToken import CreateAccessToken, VerifyAccessToken
+from typing import Optional
+from datetime import date, time
 import uvicorn
 import random
 
@@ -71,19 +73,57 @@ async def login(request: LoginSchema, db: Session = Depends(get_db)):
         print(e)
         return Response(status_code=500, content=str(e))
 
-@app.get("/dashboard")
-async def dashboard(request: Request, db: Session = Depends(get_db)):
-    try:
-        token = request.headers.get("Authorization")
-        if token:
-            profile_id = VerifyAccessToken(token)
-            if profile_id:
-                return Response(status_code=200, content="Dashboard")
-            return Response(status_code=401, content="Invalid token")
-        return Response(status_code=401, content="Token not found")
-    except Exception as e:
-        print(e)
-        return Response(status_code=500, content=str(e))
+@app.get("/api/profile")
+async def get_profile(request: str = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Get current user's profile"""
+    token = request
+    user_id = VerifyAccessToken(token)
+    if user_id:
+        return GetProfile(db, user_id)
+    return Response(status_code=401, content="Invalid token")
+
+@app.post("/api/shoots")
+async def create_shoot(shoot: ShootCreate, token: str = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Create a new shoot"""
+    user_id = VerifyAccessToken(token)
+    if not user_id:
+        return Response(status_code=401, content="Invalid token")
+    
+    
+    return AddShoot(db, user_id, shoot.shoot_date, shoot.shoot_time, shoot.location, shoot.name, shoot.brand_name, shoot.notes)
+
+@app.get("/api/shoots")
+async def get_shoots(token: str = Depends(get_current_user),db: Session = Depends(get_db),completed: Optional[bool] = None,start_date: Optional[date] = None,end_date: Optional[date] = None):
+    """Get all shoots for current user with optional filters"""
+    user_id = VerifyAccessToken(token)
+    if not user_id:
+        return Response(status_code=401, content="Invalid token")
+    return GetShoots(db, user_id, completed, start_date, end_date)
+
+@app.put("/api/shoots/{shoot_id}")
+async def update_shoot(shoot_id: str, shoot_update: ShootUpdate,token: str = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Update a shoot (including rescheduling)"""
+    user_id = VerifyAccessToken(token)
+    if not user_id:
+        return Response(status_code=401, content="Invalid token")
+    return UpdateShoot(db, user_id, shoot_id, shoot_update)
+
+@app.delete("/api/shoots/{shoot_id}")
+async def delete_shoot(shoot_id: str, db: Session = Depends(get_db), token: str = Depends(get_current_user)):
+    """Soft delete a shoot"""
+    user_id = VerifyAccessToken(token)
+    if not user_id:
+        return Response(status_code=401, content="Invalid token")
+    DeleteShoot(db, user_id, shoot_id)
+    return {"message": "Shoot deleted successfully", "status": "success"}
+
+@app.get("/api/shoots/{shoot_id}")
+async def get_shoot(shoot_id: str, db: Session = Depends(get_db), token: str = Depends(get_current_user)):
+    """Get a specific shoot"""
+    user_id = VerifyAccessToken(token)
+    if not user_id:
+        return Response(status_code=401, content="Invalid token")
+    return GetShoot(db, user_id, shoot_id)
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8080, reload=True)

@@ -1,4 +1,7 @@
 from pydantic import BaseModel, EmailStr, Field
+from datetime import date, time
+from typing import List, Optional
+
 
 class SignupInitiate(BaseModel):
     email_id: EmailStr = Field(..., description="Email ID of the influencer")
@@ -20,3 +23,20 @@ class SignupFinal(BaseModel):
 class LoginSchema(BaseModel):
     email_id: EmailStr = Field(..., description="Email ID of the influencer")
     password: str = Field(..., description="Password of the influencer")
+
+class ShootCreate(BaseModel):
+    shoot_date: date
+    shoot_time: Optional[time] = None
+    location: Optional[str] = None
+    name: Optional[str] = None
+    brand_name: Optional[str] = None
+    notes: Optional[str] = None
+
+class ShootUpdate(BaseModel):
+    shoot_date: Optional[date] = None
+    shoot_time: Optional[time] = None
+    location: Optional[str] = None
+    name: Optional[str] = None
+    brand_name: Optional[str] = None
+    notes: Optional[str] = None
+    completed: Optional[bool] = None

@@ -2,8 +2,8 @@ from accessToken import CreateAccessToken, VerifyAccessToken, get_current_user
 from fastapi import FastAPI, Request, Response, Depends
 from database import get_db
 from sqlalchemy.orm import Session
-from databaseAccess import AddInfluencers, VerifyOTP, FinalSignup, Login, GetProfile, AddShoot, GetShoots, UpdateShoot, DeleteShoot
-from schema.auth import SignupInitiate, VerifyOtp, SignupFinal, LoginSchema, ShootCreate, ShootUpdate
+from databaseAccess import AddInfluencers, VerifyOTP, FinalSignup, Login, GetProfile, AddShoot, GetShoots, UpdateShoot, DeleteShoot,AddUpload, GetUploads, GetUpload,UpdateUploads, DeleteUpload
+from schema.auth import SignupInitiate, VerifyOtp, SignupFinal, LoginSchema, ShootCreate, ShootUpdate, UploadCreate, UploadResponse, UploadUpdate
 from maiService import send_otp_email
 from accessToken import CreateAccessToken, VerifyAccessToken
 from typing import Optional
@@ -124,6 +124,51 @@ async def get_shoot(shoot_id: str, db: Session = Depends(get_db), token: str = D
     if not user_id:
         return Response(status_code=401, content="Invalid token")
     return GetShoot(db, user_id, shoot_id)
+
+@app.post("/api/uploads")
+async def create_upload(upload: UploadCreate, db: Session = Depends(get_db), token: str = Depends(get_current_user)):
+    """Create a new upload"""
+    user_id = VerifyAccessToken(token)
+    if not user_id:
+        return Response(status_code=401, content="Invalid token")
+    return AddUpload(db, user_id, upload)
+
+@app.get("/api/uploads", response_model=list[UploadResponse])
+async def get_uploads(token: str = Depends(get_current_user),db: Session = Depends(get_db),completed: Optional[bool] = None,start_date: Optional[date] = None,end_date: Optional[date] = None,platform: Optional[str] = None):
+    """Get all uploads for current user with optional filters"""
+    user_id = VerifyAccessToken(token)
+    if not user_id:
+        return Response(status_code=401, content="Invalid token")
+    
+    return GetUploads(db, user_id, completed, start_date, end_date, platform)
+
+@app.get("/api/uploads/{upload_id}", response_model=UploadResponse)
+async def get_upload(upload_id: str, db: Session = Depends(get_db), token: str = Depends(get_current_user)):
+    """Get a specific upload"""
+    user_id = VerifyAccessToken(token)
+    if not user_id:
+        return Response(status_code=401, content="Invalid token")
+    
+    return GetUpload(db, user_id, upload_id)
+
+@app.put("/api/uploads/{upload_id}", response_model=UploadResponse)
+async def update_upload(upload_id: str, upload_update: UploadUpdate, db: Session = Depends(get_db), token: str = Depends(get_current_user)):
+    """Update an upload (including rescheduling)"""
+    user_id = VerifyAccessToken(token)
+    if not user_id:
+        return Response(status_code=401, content="Invalid token")
+    return UpdateUploads(db, user_id, upload_id, upload_update)
+
+@app.delete("/api/uploads/{upload_id}")
+async def delete_upload(upload_id: str, db: Session = Depends(get_db), token: str = Depends(get_current_user)):
+    """Soft delete an upload"""
+    user_id = VerifyAccessToken(token)
+    if not user_id:
+        return Response(status_code=401, content="Invalid token")
+    
+    DeleteUpload(db, user_id, upload_id)
+    
+    return {"message": "Upload deleted successfully", "status": "success"}
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8080, reload=True)

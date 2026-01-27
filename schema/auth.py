@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field
-from datetime import date, time
+from datetime import date, time, datetime
 from typing import List, Optional
 
 
@@ -40,3 +40,37 @@ class ShootUpdate(BaseModel):
     brand_name: Optional[str] = None
     notes: Optional[str] = None
     completed: Optional[bool] = None
+
+class UploadCreate(BaseModel):
+    upload_date: date
+    upload_time: Optional[time] = None
+    name: Optional[str] = None
+    platform: Optional[str] = None
+    brand_name: Optional[str] = None
+    notes: Optional[str] = None
+
+class UploadUpdate(BaseModel):
+    upload_date: Optional[date] = None
+    upload_time: Optional[time] = None
+    name: Optional[str] = None
+    platform: Optional[str] = None
+    brand_name: Optional[str] = None
+    notes: Optional[str] = None
+    completed: Optional[bool] = None
+
+class UploadResponse(BaseModel):
+    id: str
+    influencer_id: str
+    upload_date: Optional[date]
+    upload_time: Optional[time]
+    name: Optional[str]
+    platform: Optional[str]
+    brand_name: Optional[str]
+    completed: bool
+    completed_at: Optional[datetime]
+    notes: Optional[str]
+    created_at: datetime
+    updated_at: datetime
+    
+    class Config:
+        from_attributes = True

@@ -1,9 +1,10 @@
 from sqlalchemy.orm import Session
-from models import Influencer, Shoots
+from models import Influencer, Shoots, Uploads
 from datetime import datetime, timedelta
 from datetime import date, time
+from fastapi import HTTPException
 from typing import Optional
-from schema.auth import ShootUpdate
+from schema.auth import ShootUpdate, UploadCreate, UploadUpdate
 
 def AddInfluencers(db: Session, name: str, email_id: str, phone_number: str, password: str, otp: int):
     influencer = db.query(Influencer).filter(Influencer.email_id == email_id).first()
@@ -162,3 +163,93 @@ def DeleteShoot(db: Session, user_id: int, shoot_id: int):
     db.refresh(shoot)
     
     return shoot
+
+def AddUpload(db: Session, user_id: int, upload: UploadCreate):
+    new_upload = Uploads(
+        influencer_id=user_id,
+        upload_date=upload.upload_date,
+        upload_time=upload.upload_time,
+        name=upload.name,
+        platform=upload.platform,
+        brand_name=upload.brand_name,
+        notes=upload.notes
+    )
+    
+    db.add(new_upload)
+    db.commit()
+    db.refresh(new_upload)
+    
+    return new_upload
+
+def GetUploads(db: Session, user_id: int, completed: Optional[bool] = None, start_date: Optional[date] = None, end_date: Optional[date] = None, platform: Optional[str] = None):
+    query = db.query(Uploads).filter(
+        Uploads.influencer_id == user_id,
+        Uploads.deleted == False
+    )
+    
+    if completed is not None:
+        query = query.filter(Uploads.completed == completed)
+    
+    if start_date:
+        query = query.filter(Uploads.upload_date >= start_date)
+    
+    if end_date:
+        query = query.filter(Uploads.upload_date <= end_date)
+    
+    if platform:
+        query = query.filter(Uploads.platform == platform)
+    
+    uploads = query.order_by(Uploads.upload_date.desc()).all()
+    return uploads
+
+def GetUpload(db: Session, user_id: int, upload_id: int):
+    upload = db.query(Uploads).filter(
+        Uploads.id == upload_id,
+        Uploads.influencer_id == user_id,
+        Uploads.deleted == False
+    ).first()
+    if not upload:
+        raise HTTPException(status_code=404, detail="Upload not found")
+    return upload
+
+def UpdateUploads(db: Session, user_id: int, upload_id: int, upload_update: UploadUpdate):
+    upload = db.query(Uploads).filter(
+        Uploads.id == upload_id,
+        Uploads.influencer_id == user_id,
+        Uploads.deleted == False
+    ).first()
+    
+    if not upload:
+        raise HTTPException(status_code=404, detail="Upload not found")
+    
+    # Update fields
+    update_data = upload_update.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(upload, field, value)
+    
+    # If marking as completed, set completed_at
+    if upload_update.completed and not upload.completed_at:
+        upload.completed_at = datetime.utcnow()
+    
+    upload.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(upload)
+    
+    return upload
+
+def DeleteUpload(db: Session, user_id: int, upload_id: int):
+    upload = db.query(Uploads).filter(
+        Uploads.id == upload_id,
+        Uploads.influencer_id == user_id,
+        Uploads.deleted == False
+    ).first()
+    
+    if not upload:
+        raise HTTPException(status_code=404, detail="Upload not found")
+    
+    upload.deleted = True
+    upload.deleted_at = datetime.utcnow()
+    db.commit()
+    db.refresh(upload)
+    
+    return upload

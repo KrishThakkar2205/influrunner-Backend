@@ -2,7 +2,7 @@ from accessToken import CreateAccessToken, VerifyAccessToken, get_current_user
 from fastapi import FastAPI, Request, Response, Depends
 from database import get_db
 from sqlalchemy.orm import Session
-from databaseAccess import AddInfluencers, VerifyOTP, FinalSignup, Login, GetProfile, AddShoot, GetShoots, UpdateShoot, DeleteShoot,AddUpload, GetUploads, GetUpload,UpdateUploads, DeleteUpload
+from databaseAccess import AddInfluencers, VerifyOTP, FinalSignup, Login, GetProfile, AddShoot, GetShoots, UpdateShoot, DeleteShoot,AddUpload, GetUploads, GetUpload,UpdateUploads, DeleteUpload, GenerateReview
 from schema.auth import SignupInitiate, VerifyOtp, SignupFinal, LoginSchema, ShootCreate, ShootUpdate, UploadCreate, UploadResponse, UploadUpdate
 from maiService import send_otp_email
 from accessToken import CreateAccessToken, VerifyAccessToken
@@ -169,6 +169,15 @@ async def delete_upload(upload_id: str, db: Session = Depends(get_db), token: st
     DeleteUpload(db, user_id, upload_id)
     
     return {"message": "Upload deleted successfully", "status": "success"}
+
+@app.post("/api/reviews/generate/{shoot_id}")
+async def generate_review_link(shoot_id: str, db: Session = Depends(get_db), token: str = Depends(get_current_user)):
+    """Generate a unique review link for a completed shoot"""
+    user_id = VerifyAccessToken(token)
+    if not user_id:
+        return Response(status_code=401, content="Invalid token")
+    review_link = GenerateReview(db, user_id, shoot_id)
+    return {"review_link": review_link}
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8080, reload=True)

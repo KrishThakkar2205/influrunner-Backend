@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from models import Influencer, Shoots, Uploads
+from models import Influencer, Shoots, Uploads, Reviews
 from datetime import datetime, timedelta
 from datetime import date, time
 from fastapi import HTTPException
@@ -253,3 +253,38 @@ def DeleteUpload(db: Session, user_id: int, upload_id: int):
     db.refresh(upload)
     
     return upload
+
+def GenerateReview(db: Session, user_id: int, shoot_id: int):
+    shoot = db.query(Shoots).filter(
+        Shoots.id == shoot_id,
+        Shoots.influencer_id == user_id,
+        Shoots.deleted == False
+    ).first()
+    
+    if not shoot:
+        raise HTTPException(status_code=404, detail="Shoot not found")
+    
+    if not shoot.completed:
+        raise HTTPException(status_code=400, detail="Shoot must be completed before generating review link")
+    
+    # Generate unique token
+    # token = f"rev_{secrets.token_urlsafe(32)}"
+    
+    # Create review entry
+    review = Reviews(
+        influencer_id=user_id,
+        shoot_id=shoot_id,
+        reviewer_name="",  # Will be filled when client submits
+        reviewer_phone="",
+        reviewer_email="",
+        rating=0,
+        submitted=False
+    )
+    
+    db.add(review)
+    db.commit()
+    db.refresh(review)
+    
+    # Update review ID to use as token (or store token separately)
+    review_link = f"/review/{review.id}"
+    return review_link

@@ -2,8 +2,8 @@ from accessToken import CreateAccessToken, VerifyAccessToken, get_current_user
 from fastapi import FastAPI, Request, Response, Depends
 from database import get_db
 from sqlalchemy.orm import Session
-from databaseAccess import AddInfluencers, VerifyOTP, FinalSignup, Login, GetProfile, AddShoot, GetShoots, UpdateShoot, DeleteShoot,AddUpload, GetUploads, GetUpload,UpdateUploads, DeleteUpload, GenerateReview
-from schema.auth import ReviewResponse, ValidateReviewToken ,SignupInitiate, VerifyOtp, SignupFinal, LoginSchema, ShootCreate, ShootUpdate, UploadCreate, UploadResponse, UploadUpdate, ReviewSubmit
+from databaseAccess import ValidateReviewToken, AddInfluencers, VerifyOTP, FinalSignup, Login, GetProfile, AddShoot, GetShoots, UpdateShoot, DeleteShoot,AddUpload, GetUploads, GetUpload,UpdateUploads, DeleteUpload, GenerateReview
+from schema.auth import ReviewResponse,SignupInitiate, VerifyOtp, SignupFinal, LoginSchema, ShootCreate, ShootUpdate, UploadCreate, UploadResponse, UploadUpdate, ReviewSubmit
 from maiService import send_otp_email
 from accessToken import CreateAccessToken, VerifyAccessToken
 from typing import Optional

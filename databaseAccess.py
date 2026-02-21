@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from datetime import date, time
 from fastapi import HTTPException
 from typing import Optional
-from schema.auth import ShootUpdate, UploadCreate, UploadUpdate
+from schema.auth import ShootUpdate, UploadCreate, UploadUpdate, ReviewSubmit
 
 def AddInfluencers(db: Session, name: str, email_id: str, phone_number: str, password: str, otp: int):
     influencer = db.query(Influencer).filter(Influencer.email_id == email_id).first()
@@ -288,3 +288,60 @@ def GenerateReview(db: Session, user_id: int, shoot_id: int):
     # Update review ID to use as token (or store token separately)
     review_link = f"/review/{review.id}"
     return review_link
+
+def ValidateReviewToken(db: Session, token: str):
+    review = db.query(Reviews).filter(
+        Reviews.id == token,
+        Reviews.deleted == False
+    ).first()
+    
+    if not review:
+        raise HTTPException(status_code=404, detail="Invalid review link")
+    
+    if review.submitted:
+        raise HTTPException(status_code=400, detail="Review already submitted")
+    
+    # Get shoot and influencer details
+    shoot = db.query(Shoots).filter(Shoots.id == review.shoot_id).first()
+    influencer = db.query(Influencer).filter(Influencer.id == review.influencer_id).first()
+    
+    return {
+        "influencer_name": influencer.name,
+        "shoot_name": shoot.name if shoot.name else "Project",
+        "brand_name": shoot.brand_name,
+        "shoot_date": shoot.shoot_date
+    }
+
+def SubmitReview(db: Session, token: str, review_data: ReviewSubmit):
+    review = db.query(Reviews).filter(
+        Reviews.id == token,
+        Reviews.deleted == False
+    ).first()
+    
+    if not review:
+        raise HTTPException(status_code=404, detail="Invalid review link")
+    
+    if review.submitted:
+        raise HTTPException(status_code=400, detail="Review already submitted")
+    
+    # Update review with client data
+    review.reviewer_name = review_data.reviewer_name
+    review.reviewer_phone = review_data.reviewer_phone
+    review.reviewer_email = review_data.reviewer_email
+    review.rating = review_data.rating
+    review.review = review_data.review
+    review.submitted = True
+    review.submitted_at = datetime.utcnow()
+    
+    db.commit()
+    
+    return {"message": "Review submitted successfully", "status": "success"}
+
+def GetReviews(db: Session, user_id: int):
+    reviews = db.query(Reviews).filter(
+        Reviews.influencer_id == user_id,
+        Reviews.submitted == True,
+        Reviews.deleted == False
+    ).order_by(Reviews.submitted_at.desc()).all()
+    
+    return reviews

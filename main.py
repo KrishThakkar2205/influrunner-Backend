@@ -3,7 +3,7 @@ from fastapi import FastAPI, Request, Response, Depends
 from database import get_db
 from sqlalchemy.orm import Session
 from databaseAccess import AddInfluencers, VerifyOTP, FinalSignup, Login, GetProfile, AddShoot, GetShoots, UpdateShoot, DeleteShoot,AddUpload, GetUploads, GetUpload,UpdateUploads, DeleteUpload, GenerateReview
-from schema.auth import SignupInitiate, VerifyOtp, SignupFinal, LoginSchema, ShootCreate, ShootUpdate, UploadCreate, UploadResponse, UploadUpdate
+from schema.auth import ReviewResponse, ValidateReviewToken ,SignupInitiate, VerifyOtp, SignupFinal, LoginSchema, ShootCreate, ShootUpdate, UploadCreate, UploadResponse, UploadUpdate, ReviewSubmit
 from maiService import send_otp_email
 from accessToken import CreateAccessToken, VerifyAccessToken
 from typing import Optional
@@ -179,5 +179,23 @@ async def generate_review_link(shoot_id: str, db: Session = Depends(get_db), tok
     review_link = GenerateReview(db, user_id, shoot_id)
     return {"review_link": review_link}
 
+@app.get("/api/reviews/validate/{token}")
+async def validate_review_token(token: str, db: Session = Depends(get_db)):
+    """Validate a review token and return shoot details"""
+    return ValidateReviewToken(db, token)
+
+@app.post("/api/reviews/submit/{token}")
+async def submit_review(token: str, review_data: ReviewSubmit, db: Session = Depends(get_db)):
+    """Submit a client review"""
+    return SubmitReview(db, token, review_data)
+
+@app.get("/api/reviews", response_model=List[ReviewResponse])
+async def get_reviews(db: Session = Depends(get_db), token: str = Depends(get_current_user)):
+    """Get all reviews for current user"""
+    user_id = VerifyAccessToken(token)
+    if not user_id:
+        return Response(status_code=401, content="Invalid token")
+    return GetReviews(db, user_id)
+
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="127.0.0.1", port=8080, reload=True)
+    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)

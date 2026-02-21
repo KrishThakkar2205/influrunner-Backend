@@ -74,3 +74,26 @@ class UploadResponse(BaseModel):
     
     class Config:
         from_attributes = True
+
+class ReviewSubmit(BaseModel):
+    reviewer_name: str
+    reviewer_phone: str
+    reviewer_email: EmailStr
+    rating: int = Field(..., ge=1, le=5)
+    review: Optional[str] = None
+
+class ReviewResponse(BaseModel):
+    id: str
+    influencer_id: str
+    shoot_id: Optional[str]
+    reviewer_name: str
+    reviewer_phone: str
+    reviewer_email: str
+    rating: int
+    review: Optional[str]
+    submitted: bool
+    submitted_at: Optional[datetime]
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True

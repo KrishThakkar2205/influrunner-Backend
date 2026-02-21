@@ -189,7 +189,7 @@ async def submit_review(token: str, review_data: ReviewSubmit, db: Session = Dep
     """Submit a client review"""
     return SubmitReview(db, token, review_data)
 
-@app.get("/api/reviews", response_model=List[ReviewResponse])
+@app.get("/api/reviews", response_model=list[ReviewResponse])
 async def get_reviews(db: Session = Depends(get_db), token: str = Depends(get_current_user)):
     """Get all reviews for current user"""
     user_id = VerifyAccessToken(token)

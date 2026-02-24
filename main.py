@@ -3,7 +3,7 @@ from fastapi import FastAPI, Request, Response, Depends
 from fastapi.responses import RedirectResponse
 from database import get_db
 from sqlalchemy.orm import Session
-from databaseAccess import ValidateReviewToken, AddInfluencers, VerifyOTP, FinalSignup, Login, GetProfile, AddShoot, GetShoots, UpdateShoot, DeleteShoot,AddUpload, GetUploads, GetUpload,UpdateUploads, DeleteUpload, GenerateReview
+from databaseAccess import AddSocialMedia, ValidateReviewToken, AddInfluencers, VerifyOTP, FinalSignup, Login, GetProfile, AddShoot, GetShoots, UpdateShoot, DeleteShoot,AddUpload, GetUploads, GetUpload,UpdateUploads, DeleteUpload, GenerateReview
 from schema.auth import ReviewResponse,SignupInitiate, VerifyOtp, SignupFinal, LoginSchema, ShootCreate, ShootUpdate, UploadCreate, UploadResponse, UploadUpdate, ReviewSubmit
 from maiService import send_otp_email
 from accessToken import CreateAccessToken, VerifyAccessToken
@@ -216,21 +216,39 @@ async def connect_social_media(request: Request, platform: str, db: Session = De
 @app.get("/redirect/instagram")
 async def instagram_redirect(code: str, state: str, db: Session = Depends(get_db)):
     """Handle Instagram OAuth redirect"""
-    print(code)
-    print(state)
-    url = "https://api.instagram.com/oauth/access_token"
+    try:
+        influencer_id = state
+        url = "https://api.instagram.com/oauth/access_token"
 
-    payload = {
-        "client_id": "2447536092327866",
-        "client_secret": "68d658c3f4e135f6f8e289f0af95def4",
-        "grant_type": "authorization_code",
-        "redirect_uri": "https://api.influrunner.com/redirect/instagram",
-        "code": code
-    }
+        payload = {
+            "client_id": "2447536092327866",
+            "client_secret": "68d658c3f4e135f6f8e289f0af95def4",
+            "grant_type": "authorization_code",
+            "redirect_uri": "https://api.influrunner.com/redirect/instagram",
+            "code": code
+        }
 
-    response = requests.post(url, data=payload)
-    print(response.json())
-    return RedirectResponse("https://influrunner.com/")
+        response = requests.post(url, data=payload)
+        data = response.json()
+        temp_access_token = data.get("access_token")
+        platform_user_id = data.get("user_id")
+
+        payload = {
+            "client_secret": "68d658c3f4e135f6f8e289f0af95def4",
+            "grant_type": "ig_exchange_token",
+            "access_token" : temp_access_token
+        }
+        response =  requests.get(url, data=payload)
+        data = response.json()
+        access_token = data.get("access_token")
+        expires_in_seconds = data.get("expires_in")
+        expires_in = datetime.utcnow() + timedelta(seconds=expires_in_seconds)
+        
+        AddSocialMedia(db, influencer_id, platform_user_id, access_token, expires_in, "instagram")
+
+        return RedirectResponse("https://influrunner.com/", status_code=200)
+    except Exception as e:
+        return RedirectResponse("https://influrunner.com/", status_code=500)
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000)

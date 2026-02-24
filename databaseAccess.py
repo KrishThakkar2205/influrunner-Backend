@@ -1,3 +1,4 @@
+from models import Credentials
 from sqlalchemy.orm import Session
 from models import Influencer, Shoots, Uploads, Reviews
 from datetime import datetime, timedelta
@@ -345,3 +346,16 @@ def GetReviews(db: Session, user_id: int):
     ).order_by(Reviews.submitted_at.desc()).all()
     
     return reviews
+
+def AddSocialMedia(db: Session, influencer_id: int, platform_user_id: int, access_token: str, expires_in: datetime, platform: str):
+    social_media = Credentials(
+        influencer_id=influencer_id,
+        username=platform_user_id,
+        access_token=access_token,
+        expires_in=expires_in,
+        platform=platform
+    )
+    db.add(social_media)
+    db.commit()
+    db.refresh(social_media)
+    return social_media

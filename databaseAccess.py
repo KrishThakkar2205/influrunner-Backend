@@ -346,10 +346,11 @@ def GetReviews(db: Session, user_id: int):
     
     return reviews
 
-def AddSocialMedia(db: Session, influencer_id: int, platform_user_id: int, access_token: str, expires_in: datetime, platform: str):
+def AddSocialMedia(db: Session, influencer_id: int, platform_user_id: int,refresh_token: str , access_token: str, expires_in: datetime, platform: str):
     social_media = Credentials(
         influencer_id=influencer_id,
         username=platform_user_id,
+        refresh_token=refresh_token,
         access_token=access_token,
         expires_at=expires_in,
         platform=platform

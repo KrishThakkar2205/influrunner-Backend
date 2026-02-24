@@ -247,7 +247,7 @@ async def instagram_redirect(code: str, state: str, db: Session = Depends(get_db
         expires_in_seconds = data.get("expires_in")
         expires_in = datetime.utcnow() + timedelta(seconds=expires_in_seconds)
         
-        AddSocialMedia(db, influencer_id, platform_user_id, access_token, expires_in, "instagram")
+        AddSocialMedia(db, influencer_id, platform_user_id, access_token, access_token, expires_in, "instagram")
 
         return RedirectResponse("https://influrunner.com/?auth_status=success")
     except Exception as e:

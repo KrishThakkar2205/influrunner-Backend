@@ -11,6 +11,7 @@ from typing import Optional
 from datetime import date, time
 import uvicorn
 import random
+import requests 
 
 app = FastAPI()
 

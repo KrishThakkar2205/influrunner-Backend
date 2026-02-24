@@ -249,10 +249,10 @@ async def instagram_redirect(code: str, state: str, db: Session = Depends(get_db
         
         AddSocialMedia(db, influencer_id, platform_user_id, access_token, expires_in, "instagram")
 
-        return RedirectResponse("https://influrunner.com/")
+        return RedirectResponse("https://influrunner.com/?auth_status=success")
     except Exception as e:
         print(e)
-        return RedirectResponse("https://influrunner.com/", status_code=500)
+        return RedirectResponse("https://influrunner.com/?auth_status=fail")
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000)

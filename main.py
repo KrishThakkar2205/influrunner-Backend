@@ -229,7 +229,7 @@ async def instagram_redirect(code: str, state: str, db: Session = Depends(get_db
     }
 
     response = requests.post(url, data=payload)
-    print(response)
+    print(response.json())
     return RedirectResponse("https://influrunner.com/")
 
 if __name__ == "__main__":

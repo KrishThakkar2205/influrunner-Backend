@@ -217,7 +217,18 @@ async def instagram_redirect(code: str, state: str, db: Session = Depends(get_db
     """Handle Instagram OAuth redirect"""
     print(code)
     print(state)
-    
+    url = "https://api.instagram.com/oauth/access_token"
+
+    payload = {
+        "client_id": "2447536092327866",
+        "client_secret": "68d658c3f4e135f6f8e289f0af95def4",
+        "grant_type": "authorization_code",
+        "redirect_uri": "https://api.influrunner.com/redirect/instagram",
+        "code": code
+    }
+
+    response = requests.post(url, data=payload)
+    print(response)
     return RedirectResponse("https://influrunner.com/")
 
 if __name__ == "__main__":

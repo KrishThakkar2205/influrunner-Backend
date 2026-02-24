@@ -249,7 +249,7 @@ async def instagram_redirect(code: str, state: str, db: Session = Depends(get_db
         
         AddSocialMedia(db, influencer_id, platform_user_id, access_token, expires_in, "instagram")
 
-        return RedirectResponse("https://influrunner.com/", status_code=200)
+        return RedirectResponse("https://influrunner.com/")
     except Exception as e:
         print(e)
         return RedirectResponse("https://influrunner.com/", status_code=500)

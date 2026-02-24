@@ -232,13 +232,13 @@ async def instagram_redirect(code: str, state: str, db: Session = Depends(get_db
         data = response.json()
         temp_access_token = data.get("access_token")
         platform_user_id = data.get("user_id")
-
+        print(temp_access_token)
         payload = {
             "client_secret": "68d658c3f4e135f6f8e289f0af95def4",
             "grant_type": "ig_exchange_token",
-            "access_token" : temp_access_token
+            "access_token" : temp_access_token,
         }
-        response =  requests.get(url, data=payload)
+        response =  requests.get(url, params=payload)
         print(response)
         data = response.json()
         access_token = data.get("access_token")

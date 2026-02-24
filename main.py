@@ -248,6 +248,7 @@ async def instagram_redirect(code: str, state: str, db: Session = Depends(get_db
 
         return RedirectResponse("https://influrunner.com/", status_code=200)
     except Exception as e:
+        print(e)
         return RedirectResponse("https://influrunner.com/", status_code=500)
 
 if __name__ == "__main__":

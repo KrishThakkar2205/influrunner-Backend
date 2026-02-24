@@ -218,7 +218,7 @@ async def instagram_redirect(code: str, state: str, db: Session = Depends(get_db
     print(code)
     print(state)
     
-    return Response(status_code=200, content="connected Successfully")
+    return RedirectResponse("https://influrunner.com/")
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000)

@@ -233,6 +233,8 @@ async def instagram_redirect(code: str, state: str, db: Session = Depends(get_db
         temp_access_token = data.get("access_token")
         platform_user_id = data.get("user_id")
         print(temp_access_token)
+
+        url = "https://graph.instagram.com/access_token"
         payload = {
             "client_secret": "68d658c3f4e135f6f8e289f0af95def4",
             "grant_type": "ig_exchange_token",

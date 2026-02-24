@@ -351,7 +351,7 @@ def AddSocialMedia(db: Session, influencer_id: int, platform_user_id: int, acces
         influencer_id=influencer_id,
         username=platform_user_id,
         access_token=access_token,
-        expires_in=expires_in,
+        expires_at=expires_in,
         platform=platform
     )
     db.add(social_media)

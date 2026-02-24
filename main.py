@@ -1,5 +1,6 @@
 from accessToken import CreateAccessToken, VerifyAccessToken, get_current_user
 from fastapi import FastAPI, Request, Response, Depends
+from fastapi.responses import RedirectResponse
 from database import get_db
 from sqlalchemy.orm import Session
 from databaseAccess import ValidateReviewToken, AddInfluencers, VerifyOTP, FinalSignup, Login, GetProfile, AddShoot, GetShoots, UpdateShoot, DeleteShoot,AddUpload, GetUploads, GetUpload,UpdateUploads, DeleteUpload, GenerateReview
@@ -196,6 +197,28 @@ async def get_reviews(db: Session = Depends(get_db), token: str = Depends(get_cu
     if not user_id:
         return Response(status_code=401, content="Invalid token")
     return GetReviews(db, user_id)
+
+@app.get("/api/social-media/connect/{platform}")
+async def connect_social_media(request: Request, platform: str, db: Session = Depends(get_db), token:str = Depends(get_current_user)):
+    """Initiate OAuth connection for social media platform"""
+    user_id = VerifyAccessToken(token)
+    if not user_id:
+        return Response(status_code=401, content="Invalid token")
+    
+    if platform not in ["instagram", "facebook", "youtube"]:
+        raise HTTPException(status_code=400, detail="Invalid platform")
+    if platform == "instagram":
+        print(user_id)
+        url = f"https://www.instagram.com/oauth/authorize?force_reauth=true&client_id=2447536092327866&redirect_uri=https://api.influrunner.com/redirect/instagram&response_type=code&state={user_id}&scope=instagram_business_basic%2Cinstagram_business_manage_messages%2Cinstagram_business_manage_comments%2Cinstagram_business_content_publish%2Cinstagram_business_manage_insights"
+        return RedirectResponse(url)
+
+@app.get("/redirect/instagram")
+async def instagram_redirect(code: str, state: str, db: Session = Depends(get_db)):
+    """Handle Instagram OAuth redirect"""
+    print(code)
+    print(state)
+    
+    return Response(status_code=200, content="connected Successfully")
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000)

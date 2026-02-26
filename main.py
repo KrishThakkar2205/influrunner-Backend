@@ -205,11 +205,9 @@ async def connect_social_media(request: Request, platform: str, db: Session = De
     user_id = VerifyAccessToken(token)
     if not user_id:
         return Response(status_code=401, content="Invalid token")
-    
     if platform not in ["instagram", "facebook", "youtube"]:
         raise HTTPException(status_code=400, detail="Invalid platform")
     if platform == "instagram":
-        print(user_id)
         url = f"https://www.instagram.com/oauth/authorize?force_reauth=true&client_id=2447536092327866&redirect_uri=https://api.influrunner.com/redirect/instagram&response_type=code&state={user_id}&scope=instagram_business_basic%2Cinstagram_business_manage_messages%2Cinstagram_business_manage_comments%2Cinstagram_business_content_publish%2Cinstagram_business_manage_insights"
         return RedirectResponse(url)
 
@@ -218,6 +216,7 @@ async def instagram_redirect(code: str, state: str, db: Session = Depends(get_db
     """Handle Instagram OAuth redirect"""
     try:
         influencer_id = state
+        # Exchanging the Auth Code for the short lived access token
         url = "https://api.instagram.com/oauth/access_token"
 
         payload = {
@@ -232,8 +231,8 @@ async def instagram_redirect(code: str, state: str, db: Session = Depends(get_db
         data = response.json()
         temp_access_token = data.get("access_token")
         platform_user_id = data.get("user_id")
-        # print(temp_access_token)
 
+        # Exchanging the short lived access token for the long live access token
         url = "https://graph.instagram.com/access_token"
         payload = {
             "client_secret": "68d658c3f4e135f6f8e289f0af95def4",
@@ -241,7 +240,6 @@ async def instagram_redirect(code: str, state: str, db: Session = Depends(get_db
             "access_token" : temp_access_token,
         }
         response =  requests.get(url, params=payload)
-        # print(response)
         data = response.json()
         access_token = data.get("access_token")
         expires_in_seconds = data.get("expires_in")
@@ -253,6 +251,14 @@ async def instagram_redirect(code: str, state: str, db: Session = Depends(get_db
     except Exception as e:
         print(e)
         return RedirectResponse("https://influrunner.com/?auth_status=fail")
+
+@app.get("/dashboard")
+async def dashboard(db: Session = Depends(get_db), token: str = Depends(get_current_user)):
+    """Get dashboard data"""
+    user_id = VerifyAccessToken(token)
+    if not user_id:
+        return Response(status_code=401, content="Invalid token")
+    return GetDashboard(db, user_id)
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000)

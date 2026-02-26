@@ -23,6 +23,7 @@ class Influencer(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate= datetime.utcnow)
     deleted = Column(Boolean, default=False)
     deleted_at = Column(DateTime, nullable=True)
+    bio = Column(String, nullable=True)
 
 class Uploads(Base):
     __tablename__ = "uploads"

@@ -3,7 +3,7 @@ from fastapi import FastAPI, Request, Response, Depends
 from fastapi.responses import RedirectResponse
 from database import get_db
 from sqlalchemy.orm import Session
-from databaseAccess import AddSocialMedia, ValidateReviewToken, AddInfluencers, VerifyOTP, FinalSignup, Login, GetProfile, AddShoot, GetShoots, UpdateShoot, DeleteShoot,AddUpload, GetUploads, GetUpload,UpdateUploads, DeleteUpload, GenerateReview
+from databaseAccess import GetDashboard, AddSocialMedia, ValidateReviewToken, AddInfluencers, VerifyOTP, FinalSignup, Login, GetProfile, AddShoot, GetShoots, UpdateShoot, DeleteShoot,AddUpload, GetUploads, GetUpload,UpdateUploads, DeleteUpload, GenerateReview
 from schema.auth import ReviewResponse,SignupInitiate, VerifyOtp, SignupFinal, LoginSchema, ShootCreate, ShootUpdate, UploadCreate, UploadResponse, UploadUpdate, ReviewSubmit
 from maiService import send_otp_email
 from accessToken import CreateAccessToken, VerifyAccessToken
@@ -252,7 +252,7 @@ async def instagram_redirect(code: str, state: str, db: Session = Depends(get_db
         print(e)
         return RedirectResponse("https://influrunner.com/?auth_status=fail")
 
-@app.get("/dashboard")
+@app.get("/dashboard-card")
 async def dashboard(db: Session = Depends(get_db), token: str = Depends(get_current_user)):
     """Get dashboard data"""
     user_id = VerifyAccessToken(token)
@@ -260,5 +260,12 @@ async def dashboard(db: Session = Depends(get_db), token: str = Depends(get_curr
         return Response(status_code=401, content="Invalid token")
     return GetDashboard(db, user_id)
 
+@app.get("/dashboard-shoot-upload")
+async def dashboard_shoot_upload(db: Session = Depends(get_db), token: str = Depends(get_current_user)):
+    """Get dashboard shoot upload data"""
+    user_id = VerifyAccessToken(token)
+    if not user_id:
+        return Response(status_code=401, content="Invalid token")
+    return GetDashboardShootUpload(db, user_id)
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000)

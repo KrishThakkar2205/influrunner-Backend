@@ -7,4 +7,6 @@ bcrypt
 uuid
 smtp-mail
 requests
+jinja2
+pydantic[email]
 python-jose[cryptography]

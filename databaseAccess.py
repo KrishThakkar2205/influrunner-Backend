@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import func, case
 from models import Influencer, Shoots, Uploads, Reviews, Credentials
 from datetime import datetime, timedelta
 from datetime import date, time
@@ -337,7 +338,7 @@ def SubmitReview(db: Session, token: str, review_data: ReviewSubmit):
     
     return {"message": "Review submitted successfully", "status": "success"}
 
-def GetReviews(db: Session, user_id: int):
+def GetReviews(db: Session, user_id: str):
     reviews = db.query(Reviews).filter(
         Reviews.influencer_id == user_id,
         Reviews.submitted == True,
@@ -346,7 +347,7 @@ def GetReviews(db: Session, user_id: int):
     
     return reviews
 
-def AddSocialMedia(db: Session, influencer_id: int, platform_user_id: int,refresh_token: str , access_token: str, expires_in: datetime, platform: str):
+def AddSocialMedia(db: Session, influencer_id: str, platform_user_id: int,refresh_token: str , access_token: str, expires_in: datetime, platform: str):
     social_media = Credentials(
         influencer_id=influencer_id,
         username=platform_user_id,
@@ -356,6 +357,34 @@ def AddSocialMedia(db: Session, influencer_id: int, platform_user_id: int,refres
         platform=platform
     )
     db.add(social_media)
-    db.commit()
-    db.refresh(social_media)
-    return social_media
+
+def GetDashboard(db: Session, user_id:str):
+    today = datetime.utcnow()  # or datetime.now() if using local time
+    first_day = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    # infleuncer = db.query(Influencer.name).filter(Influencer.id == user_id, Influencer.deleted == False)
+    influencer_shoot_month = db.query(
+        func.count(Shoots.id).label("total_shoots"),
+        func.count(
+            case(
+                (Shoots.completed == True,1)
+            )
+        ).label("completed_shoots")
+    ).filter(
+        Shoots.influencer_id == user_id,
+        Shoots.deleted == False,
+        Shoots.created_at.between(first_day, today)
+    ).first()
+    average_rate = db.query(
+        func.avg(Reviews.rating).label("average_rating")
+    ).filter(
+        Reviews.submitted == True,
+        Reviews.deleted == False
+    ).first()
+    return {
+        "total_shoot_this_month": influencer_shoot_month.total_shoots,
+        "completed_shoots_this_month": influencer_shoot_month.completed_shoots,
+        "average_rating": average_rate.average_rating or 0
+    }
+
+def GetDashboardShootUpload(db: Session, user_id:str):
+    today = datetime.utcnow()

@@ -1,6 +1,7 @@
 from accessToken import CreateAccessToken, VerifyAccessToken, get_current_user
 from fastapi import FastAPI, Request, Response, Depends
 from fastapi.responses import RedirectResponse
+from fastapi.middleware.cors import CORSMiddleware
 from database import get_db
 from sqlalchemy.orm import Session
 from databaseAccess import GetDashboard, AddSocialMedia, ValidateReviewToken, AddInfluencers, VerifyOTP, FinalSignup, Login, GetProfile, AddShoot, GetShoots, UpdateShoot, DeleteShoot,AddUpload, GetUploads, GetUpload,UpdateUploads, DeleteUpload, GenerateReview
@@ -14,6 +15,14 @@ import random
 import requests 
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # production me specific domain use karna
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.post("/auth/signup-initiate")
 async def signup_initiate(request: SignupInitiate, db: Session = Depends(get_db)):

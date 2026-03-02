@@ -134,7 +134,7 @@ def GetShoot(db: Session, user_id: int, shoot_id: int):
         Shoots.influencer_id == user_id,
         Shoots.deleted == False
     ).first()
-    
+    print(type(shoot))
     if not shoot:
         raise HTTPException(status_code=404, detail="Shoot not found")
     

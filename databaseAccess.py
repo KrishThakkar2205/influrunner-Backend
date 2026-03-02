@@ -373,7 +373,9 @@ def AddSocialMedia(db: Session, influencer_id: str, platform_user_id: int,refres
         expires_at=expires_in,
         platform=platform
     )
-    db.add(social_media)
+    value = db.add(social_media)
+    db.commit()
+    db.refresh(social_media)
     print("Creds Added")
 
 def GetDashboard(db: Session, user_id:str):

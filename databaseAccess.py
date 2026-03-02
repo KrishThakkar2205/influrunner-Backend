@@ -62,19 +62,36 @@ def GetProfile(db: Session, user_id: int):
     user = db.query(Influencer).filter(Influencer.id == user_id).first()
     if not user:
         return Response(status_code=404, content="User not found")
+    platform = db.query(Credentials).filter(Credentials.influencer_id == user_id, Credentials.platform == "instagram").all()
     # Convert JSON categories to list
-    user_dict = {
-        "id": user.id,
-        "name": user.name,
-        "email_id": user.email_id,
-        "phone_number": user.phone_number,
-        "categories": user.categories,
-        "location": user.location,
-        "min_price": user.min_price,
-        "max_price": user.max_price,
-        "profile_picture_location": user.profile_picture_location,
-        "created_at": user.created_at
-    }
+    if platform:
+        user_dict = {
+            "id": user.id,
+            "name": user.name,
+            "email_id": user.email_id,
+            "phone_number": user.phone_number,
+            "categories": user.categories,
+            "location": user.location,
+            "min_price": user.min_price,
+            "max_price": user.max_price,
+            "profile_picture_location": user.profile_picture_location,
+            "created_at": user.created_at,
+            "instagram": True
+        }
+    else:
+        user_dict = {
+            "id": user.id,
+            "name": user.name,
+            "email_id": user.email_id,
+            "phone_number": user.phone_number,
+            "categories": user.categories,
+            "location": user.location,
+            "min_price": user.min_price,
+            "max_price": user.max_price,
+            "profile_picture_location": user.profile_picture_location,
+            "created_at": user.created_at,
+            "instagram": False
+        }
     
     return user_dict
 

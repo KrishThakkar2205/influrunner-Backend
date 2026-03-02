@@ -218,7 +218,7 @@ async def connect_social_media(request: Request, platform: str, db: Session = De
         raise HTTPException(status_code=400, detail="Invalid platform")
     if platform == "instagram":
         url = f"https://www.instagram.com/oauth/authorize?force_reauth=true&client_id=2447536092327866&redirect_uri=https://api.influrunner.com/redirect/instagram&response_type=code&state={user_id}&scope=instagram_business_basic%2Cinstagram_business_manage_messages%2Cinstagram_business_manage_comments%2Cinstagram_business_content_publish%2Cinstagram_business_manage_insights"
-        return RedirectResponse(url)
+        return {"url": url}
 
 @app.get("/redirect/instagram")
 async def instagram_redirect(code: str, state: str, db: Session = Depends(get_db)):

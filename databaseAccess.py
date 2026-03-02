@@ -374,6 +374,7 @@ def AddSocialMedia(db: Session, influencer_id: str, platform_user_id: int,refres
         platform=platform
     )
     db.add(social_media)
+    print("Creds Added")
 
 def GetDashboard(db: Session, user_id:str):
     today = datetime.utcnow()  # or datetime.now() if using local time

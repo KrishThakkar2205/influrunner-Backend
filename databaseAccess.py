@@ -126,7 +126,7 @@ def GetShoots(db: Session, user_id: int, completed: Optional[bool] = None, start
         query = query.filter(Shoots.shoot_date <= end_date)
     
     shoots = query.order_by(Shoots.shoot_date.desc()).all()
-    print(type(shoots))
+    print(type(shoots[0]))
     return shoots
 
 def GetShoot(db: Session, user_id: int, shoot_id: int):

@@ -60,6 +60,7 @@ class Shoots(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     deleted = Column(Boolean, default=False)
     deleted_at = Column(DateTime, nullable=True)
+    review_generated = Column(Boolean, default=False)
 
 class Credentials(Base):
     __tablename__ = "credentials"

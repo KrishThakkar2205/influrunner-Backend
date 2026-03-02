@@ -298,10 +298,11 @@ def GenerateReview(db: Session, user_id: int, shoot_id: int):
         rating=0,
         submitted=False
     )
-    
+    shoot.review_generated = True
     db.add(review)
     db.commit()
     db.refresh(review)
+    db.refresh(shoot)
     
     # Update review ID to use as token (or store token separately)
     review_link = f"/review/{review.id}"

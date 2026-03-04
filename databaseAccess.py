@@ -471,6 +471,8 @@ def GetPortfolio(db: Session, infleuncer_id: str):
         "profile_picture": user.profile_picture_location,
         "avg_rating": average_rate.average_rating or 0,
         "total_reviews": len(reviews),
+        "bio":user.bio,
+        
         "reviews": [
             {
                 "reviewer_name": r.reviewer_name,

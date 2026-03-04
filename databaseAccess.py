@@ -76,7 +76,8 @@ def GetProfile(db: Session, user_id: int):
             "max_price": user.max_price,
             "profile_picture_location": user.profile_picture_location,
             "created_at": user.created_at,
-            "instagram": True
+            "instagram": True,
+            "bio":user.bio
         }
     else:
         user_dict = {
@@ -90,7 +91,8 @@ def GetProfile(db: Session, user_id: int):
             "max_price": user.max_price,
             "profile_picture_location": user.profile_picture_location,
             "created_at": user.created_at,
-            "instagram": False
+            "instagram": False,
+            "bio":user.bio
         }
     
     return user_dict

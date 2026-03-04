@@ -111,23 +111,48 @@ def AddShoot(db: Session, user_id: int, shoot_date: date, shoot_time: time, loca
     return new_shoot
 
 def GetShoots(db: Session, user_id: int, completed: Optional[bool] = None, start_date: Optional[date] = None, end_date: Optional[date] = None):
-    query = db.query(Shoots).filter(
+    results = db.query(
+        Shoots,
+        Reviews.id.label("review_id")
+    ).outerjoin(
+        Reviews, Reviews.shoot_id == Shoots.id
+    ).filter(
         Shoots.influencer_id == user_id,
         Shoots.deleted == False
     )
     
     if completed is not None:
-        query = query.filter(Shoots.completed == completed)
+        results = results.filter(Shoots.completed == completed)
     
     if start_date:
-        query = query.filter(Shoots.shoot_date >= start_date)
+        results = results.filter(Shoots.shoot_date >= start_date)
     
     if end_date:
-        query = query.filter(Shoots.shoot_date <= end_date)
-    
-    shoots = query.order_by(Shoots.shoot_date.desc()).all()
-    print(type(shoots[0]))
-    return shoots
+        results = results.filter(Shoots.shoot_date <= end_date)
+    results = results.order_by(Shoots.shoot_date.desc()).all()
+    response = []
+    for shoot, review_id in results:
+        
+        response.append({
+        "shoot_date": shoot.shoot_date,
+        "location": shoot.location,
+        "brand_name": shoot.brand_name,
+        "completed_at": shoot.completed_at,
+        "created_at": shoot.created_at,
+        "review_generated": shoot.review_generated,
+        "shoot_time": shoot.shoot_time,
+        "id": shoot.id,
+        "influencer_id": shoot.influencer_id,
+        "name": shoot.name,
+        "completed": shoot.completed,
+        "notes": shoot.notes,
+        "updated_at": shoot.updated_at,
+        "deleted_at": shoot.deleted_at,
+        "review_id": review_id
+    })
+    # shoots = query.order_by(Shoots.shoot_date.desc()).all()
+    # print(type(shoots[0]))
+    return response
 
 def GetShoot(db: Session, user_id: int, shoot_id: int):
     shoot = db.query(Shoots).filter(
@@ -310,6 +335,7 @@ def GenerateReview(db: Session, user_id: int, shoot_id: int):
     return review_link
 
 def ValidateReviewToken(db: Session, token: str):
+
     review = db.query(Reviews).filter(
         Reviews.id == token,
         Reviews.deleted == False
@@ -322,8 +348,8 @@ def ValidateReviewToken(db: Session, token: str):
         raise HTTPException(status_code=400, detail="Review already submitted")
     
     # Get shoot and influencer details
-    shoot = db.query(Shoots).filter(Shoots.id == review.shoot_id).first()
-    influencer = db.query(Influencer).filter(Influencer.id == review.influencer_id).first()
+    shoot = db.query(Shoots.name, Shoots.brand_name, Shoots.shoot_date).filter(Shoots.id == review.shoot_id).first()
+    influencer = db.query(Influencer.name).filter(Influencer.id == review.influencer_id).first()
     
     return {
         "influencer_name": influencer.name,
@@ -407,6 +433,69 @@ def GetDashboard(db: Session, user_id:str):
         "completed_shoots_this_month": influencer_shoot_month.completed_shoots,
         "average_rating": average_rate.average_rating or 0
     }
+
+def GetPortfolio(db: Session, infleuncer_id: str):
+    user = db.query(Influencer).filter(
+        Influencer.id == infleuncer_id,
+        Influencer.deleted == False,
+        Influencer.signup_status == "completed"
+    ).first()
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="Portfolio not found")
+    
+    # Get reviews for this influencer
+    reviews = db.query(Reviews).filter(
+        Reviews.influencer_id == user.id,
+        Reviews.submitted == True,
+        Reviews.deleted == False
+    ).order_by(Reviews.submitted_at.desc()).limit(10).all()
+    
+    average_rate = db.query(
+        func.avg(Reviews.rating).label("average_rating")
+    ).filter(
+        Reviews.submitted == True,
+        Reviews.deleted == False
+    ).first()
+    # Calculate average rating
+
+    
+    return {
+        "name": user.name,
+        "categories": user.categories,
+        "location": user.location,
+        "min_price": user.min_price,
+        "max_price": user.max_price,
+        "profile_picture": user.profile_picture_location,
+        "avg_rating": average_rate.average_rating or 0,
+        "total_reviews": len(reviews),
+        "reviews": [
+            {
+                "reviewer_name": r.reviewer_name,
+                "rating": r.rating,
+                "review": r.review,
+                "submitted_at": r.submitted_at
+            }
+            for r in reviews[:5]  # Show only top 5 reviews
+        ]
+    }
+
+async def EditProfile(db: Session, user_id: str, profile_data: dict):
+    user = db.query(Influencer).filter(Influencer.id == user_id).first()
+    
+    # Update allowed fields
+    allowed_fields = ['name', 'bio', 'location', 'min_price', 'max_price', 'profile_picture_location']
+    for field in allowed_fields:
+        if field in profile_data:
+            setattr(user, field, profile_data[field])
+    
+    # Handle categories separately (JSON serialization)
+    if 'categories' in profile_data:
+        user.categories = profile_data['categories']
+    
+    user.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(user)
 
 def GetDashboardShootUpload(db: Session, user_id:str):
     today = datetime.utcnow()

@@ -9,6 +9,7 @@ DATABASE_URI = os.getenv("DATABASE_URI")
 
 engine = create_engine(
     DATABASE_URI,
+    connect_args={"options": "-csearch_path=influrunner"},
     pool_pre_ping=True
 )
 

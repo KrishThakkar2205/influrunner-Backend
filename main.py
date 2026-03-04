@@ -1,21 +1,27 @@
 from accessToken import CreateAccessToken, VerifyAccessToken, get_current_user
-from fastapi import FastAPI, Request, Response, Depends
+from fastapi import FastAPI, Request, Response, Depends, UploadFile, File, Form
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from database import get_db
 from sqlalchemy.orm import Session
-from databaseAccess import GetReviews, GetDashboard, AddSocialMedia, ValidateReviewToken, AddInfluencers, VerifyOTP, FinalSignup, Login, GetProfile, AddShoot, GetShoots, UpdateShoot, DeleteShoot,AddUpload, GetUploads, GetUpload,UpdateUploads, DeleteUpload, GenerateReview
+from databaseAccess import EditProfile, GetPortfolio, SubmitReview, GetReviews, GetDashboard, AddSocialMedia, ValidateReviewToken, AddInfluencers, VerifyOTP, FinalSignup, Login, GetProfile, AddShoot, GetShoots, UpdateShoot, DeleteShoot,AddUpload, GetUploads, GetUpload,UpdateUploads, DeleteUpload, GenerateReview
 from schema.auth import ReviewResponse,SignupInitiate, VerifyOtp, SignupFinal, LoginSchema, ShootCreate, ShootUpdate, UploadCreate, UploadResponse, UploadUpdate, ReviewSubmit
 from maiService import send_otp_email
 from accessToken import CreateAccessToken, VerifyAccessToken
-from typing import Optional
+from typing import Optional, List
 from datetime import date, time, datetime, timedelta
+from fastapi.staticfiles import StaticFiles
 import uvicorn
 import random
 import requests 
+import uuid
+import os
+import aiofiles
+
+UPLOAD_DIR = "uploads/profile_pictures"
 
 app = FastAPI()
-
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # production me specific domain use karna
@@ -276,5 +282,56 @@ async def dashboard_shoot_upload(db: Session = Depends(get_db), token: str = Dep
     if not user_id:
         return Response(status_code=401, content="Invalid token")
     return GetDashboardShootUpload(db, user_id)
+
+@app.get("/api/portfolio/{infleuncer_id}")
+async def get_public_portfolio(infleuncer_id: str, db: Session = Depends(get_db)):
+    """Get public portfolio by username/email"""
+    # Try to find user by email or name
+    return GetPortfolio(db,infleuncer_id)
+
+@app.put("/api/profile")
+async def update_profile(
+    name: Optional[str] = Form(None),
+    bio: Optional[str] = Form(None),
+    location: Optional[str] = Form(None),
+    min_price: Optional[float] = Form(None),
+    max_price: Optional[float] = Form(None),
+    categories: Optional[List[str]] = Form(None),  # JSON string
+    profile_picture: Optional[UploadFile] = File(None),
+    db: Session = Depends(get_db),
+    token: str = Depends(get_current_user)
+):
+    """Update user profile"""
+
+    user_id = VerifyAccessToken(token)
+    if not user_id:
+        return Response(status_code=401, content="Invalid token")
+    
+    profile_data = {}
+    if name:
+        profile_data["name"] = name
+    if bio:
+        profile_data["bio"] = bio
+    if location:
+        profile_data["location"] = location
+    if min_price:
+        profile_data["min_price"] = min_price
+    if max_price:
+        profile_data["max_price"] = max_price
+    if categories:
+        profile_data["categories"] = categories
+    if profile_picture:
+        os.makedirs(UPLOAD_DIR, exist_ok=True)
+        file_extension = profile_picture.filename.split(".")[-1]
+        unique_filename = f"{uuid.uuid4()}.{file_extension}"
+        file_path = os.path.join(UPLOAD_DIR, unique_filename)
+        profile_data["profile_picture_location"] = file_path 
+        async with aiofiles.open(file_path, "wb") as out_file:
+            content = await profile_picture.read()
+            await out_file.write(content)
+    print(profile_data)
+    await EditProfile(db, user_id, profile_data)
+    return Response(status_code=200, content="Profile updated successfully")
+
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000)

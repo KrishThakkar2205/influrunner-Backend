@@ -72,7 +72,7 @@ async def signup_final(request: SignupFinal, db: Session = Depends(get_db)):
         )
         if id:
             token = CreateAccessToken(id)
-            return {"access_token":token, "type":"Bearer"}
+            return {"access_token":token, "type":"Bearer", "id":id}
         return Response(status_code=400, content="User not found")
     except Exception as e:
         print(e)
@@ -84,7 +84,7 @@ async def login(request: LoginSchema, db: Session = Depends(get_db)):
         id = Login(db, email_id=request.email_id, password=request.password)
         if id:
             token = CreateAccessToken(id)
-            return {"access_token":token, "type":"Bearer"}
+            return {"access_token":token, "type":"Bearer", "id":id}
         return Response(status_code=400, content="Invalid credentials")
     except Exception as e:
         print(e)

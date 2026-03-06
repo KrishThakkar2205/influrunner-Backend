@@ -4,6 +4,7 @@ from models import Influencer, Shoots, Uploads, Reviews, Credentials
 from datetime import datetime, timedelta
 from datetime import date, time
 from fastapi import HTTPException
+import requests
 from typing import Optional
 from schema.auth import ShootUpdate, UploadCreate, UploadUpdate, ReviewSubmit
 

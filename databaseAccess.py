@@ -503,11 +503,27 @@ async def EditProfile(db: Session, user_id: str, profile_data: dict):
     db.refresh(user)
 
 def GetInstaPortfolioMetric(db: Session, infleuncer_id: str):
+    response_to_browser = {}
     credentials = db.query(Credentials.access_token, Credentials.refresh_token).filter(
         Credentials.influencer_id == infleuncer_id,
         Credentials.platform == "instagram"
     ).first()
+    if not credentials:
+        raise HTTPException(status_code=404, detail="Credentials not found")
+    # Account Details
     url = f"https://graph.instagram.com/v25.0/me?fields=username,media_count,followers_count&access_token={credentials.access_token}"
+    response = requests.get(url)
+    data = response.json()
+    response_to_browser["username"] = data["username"]
+    response_to_browser["media_count"] = data["media_count"]
+    response_to_browser["followers_count"] = data["followers_count"]
+    print(response_to_browser)
+    #Account Metrices
+    metrices = "accounts_engaged,reach,total_interactions,views"
+    # 30 days from now
+    since = int((datetime.utcnow() - timedelta(days=30)).timestamp())
+    until = int((datetime.utcnow().timestamp()))
+    url = f"https://graph.instagram.com/v25.0/{data['id']}/insights?metric={metrices}&period=day&since={since}&until={until}&access_token={credentials.access_token}"
     response = requests.get(url)
     data = response.json()
     print(data)

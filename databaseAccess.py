@@ -523,7 +523,7 @@ def GetInstaPortfolioMetric(db: Session, infleuncer_id: str):
     # 30 days from now
     since = int((datetime.utcnow() - timedelta(days=30)).timestamp())
     until = int((datetime.utcnow().timestamp()))
-    url = f"https://graph.instagram.com/v25.0/{data['id']}/insights?metric={metrices}&period=lifetime&since={since}&until={until}&access_token={credentials.access_token}"
+    url = f"https://graph.instagram.com/v25.0/{data['id']}/insights?metric={metrices}&period=day&since={since}&until={until}&access_token={credentials.access_token}"
     response = requests.get(url)
     data = response.json()
     print(data)

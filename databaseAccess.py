@@ -517,7 +517,7 @@ def GetInstaPortfolioMetric(db: Session, infleuncer_id: str):
     response_to_browser["username"] = data["username"]
     response_to_browser["media_count"] = data["media_count"]
     response_to_browser["followers_count"] = data["followers_count"]
-    print(response_to_browser)
+    # print(response_to_browser)
     #Account Metrices
     metrices = "accounts_engaged,reach,total_interactions,views"
     # 30 days from now
@@ -526,4 +526,7 @@ def GetInstaPortfolioMetric(db: Session, infleuncer_id: str):
     url = f"https://graph.instagram.com/v25.0/{data['id']}/insights?metric={metrices}&period=day&since={since}&until={until}&metric_type=total_value&access_token={credentials.access_token}"
     response = requests.get(url)
     data = response.json()
-    print(data)
+    for item in data['data']:
+        response_to_browser[item['name']] = item['total_value']['value']
+    return response_to_browser
+    

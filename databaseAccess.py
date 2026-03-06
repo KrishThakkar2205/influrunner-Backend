@@ -511,7 +511,7 @@ def GetInstaMediaPortfolioMetric(db:Session, influencer_id: str):
     if not credentials:
         raise HTTPException(status_code=404, detail="Credentials not found")
     #Media ID of the Account
-    url = f"https://graph.instagram.com/v25.0/me/media?fields=id,permalink&limit=5&access_token={credentials.access_token}"
+    url = f"https://graph.instagram.com/v25.0/me/media?fields=id,media_url,thumbnail_url,media_type,caption,permalink&limit=5&access_token={credentials.access_token}"
     response = requests.get(url)
     data = response.json()
     print(data)

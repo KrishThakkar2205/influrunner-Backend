@@ -559,5 +559,5 @@ def GetInstaMetricPerMedia(db: Session, influencer_id: str, media_id: str):
     data = response.json()
     print(data)
     for item in data['data']:
-        response_to_browser[item['name']] = item['value'][0]['value']
+        response_to_browser[item['name']] = item['values'][0]['value']
     return response_to_browser

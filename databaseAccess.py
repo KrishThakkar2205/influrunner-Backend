@@ -505,7 +505,7 @@ async def EditProfile(db: Session, user_id: str, profile_data: dict):
 def GetInstaMediaPortfolioMetric(db:Session, influencer_id: str):
     response_to_browser = {}
     credentials = db.query(Credentials.access_token, Credentials.refresh_token, Credentials.username).filter(
-        Credentials.influencer_id == infleuncer_id,
+        Credentials.influencer_id == influencer_id,
         Credentials.platform == "instagram"
     ).first()
     if not credentials:

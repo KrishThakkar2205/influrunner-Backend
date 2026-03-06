@@ -502,6 +502,21 @@ async def EditProfile(db: Session, user_id: str, profile_data: dict):
     db.commit()
     db.refresh(user)
 
+def GetInstaMediaPortfolioMetric(db:Session, influencer_id: str):
+    response_to_browser = {}
+    credentials = db.query(Credentials.access_token, Credentials.refresh_token, Credentials.username).filter(
+        Credentials.influencer_id == infleuncer_id,
+        Credentials.platform == "instagram"
+    ).first()
+    if not credentials:
+        raise HTTPException(status_code=404, detail="Credentials not found")
+    #Media ID of the Account
+    url = f"https://graph.instagram.com/v25.0/me/media?fields=id&access_token={credentials.access_token}"
+    response = requests.get(url)
+    data = response.json()
+    print(data)
+    return None
+
 def GetInstaPortfolioMetric(db: Session, infleuncer_id: str):
     response_to_browser = {}
     credentials = db.query(Credentials.access_token, Credentials.refresh_token).filter(
@@ -529,4 +544,3 @@ def GetInstaPortfolioMetric(db: Session, infleuncer_id: str):
     for item in data['data']:
         response_to_browser[item['name']] = item['total_value']['value']
     return response_to_browser
-    

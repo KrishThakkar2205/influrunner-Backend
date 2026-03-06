@@ -514,6 +514,7 @@ def GetInstaMediaPortfolioMetric(db:Session, influencer_id: str):
     url = f"https://graph.instagram.com/v25.0/me/media?fields=id,permalink&limit=5&access_token={credentials.access_token}"
     response = requests.get(url)
     data = response.json()
+    print(data)
     media_id = []
     for item in data['data']:
         media_id.append(item['id'])

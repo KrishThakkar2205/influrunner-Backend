@@ -501,5 +501,12 @@ async def EditProfile(db: Session, user_id: str, profile_data: dict):
     db.commit()
     db.refresh(user)
 
-def GetDashboardShootUpload(db: Session, user_id:str):
-    today = datetime.utcnow()
+def GetInstaPortfolioMetric(db: Session, infleuncer_id: str):
+    credentials = db.query(Credentials.access_token, Credentials.refresh_token).filter(
+        Credentials.influencer_id == infleuncer_id,
+        Credentials.platform == "instagram"
+    ).first()
+    url = f"https://graph.instagram.com/v25.0/me?fields=username,media_count,followers_count&access_token={credentials.access_token}"
+    response = requests.get(url)
+    data = response.json()
+    print(data)

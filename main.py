@@ -4,7 +4,7 @@ from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from database import get_db
 from sqlalchemy.orm import Session
-from databaseAccess import EditProfile, GetPortfolio, SubmitReview, GetReviews, GetDashboard, AddSocialMedia, ValidateReviewToken, AddInfluencers, VerifyOTP, FinalSignup, Login, GetProfile, AddShoot, GetShoots, UpdateShoot, DeleteShoot,AddUpload, GetUploads, GetUpload,UpdateUploads, DeleteUpload, GenerateReview
+from databaseAccess import GetInstaPortfolioMetric, EditProfile, GetPortfolio, SubmitReview, GetReviews, GetDashboard, AddSocialMedia, ValidateReviewToken, AddInfluencers, VerifyOTP, FinalSignup, Login, GetProfile, AddShoot, GetShoots, UpdateShoot, DeleteShoot,AddUpload, GetUploads, GetUpload,UpdateUploads, DeleteUpload, GenerateReview
 from schema.auth import ReviewResponse,SignupInitiate, VerifyOtp, SignupFinal, LoginSchema, ShootCreate, ShootUpdate, UploadCreate, UploadResponse, UploadUpdate, ReviewSubmit
 from maiService import send_otp_email
 from accessToken import CreateAccessToken, VerifyAccessToken
@@ -332,6 +332,12 @@ async def update_profile(
     print(profile_data)
     await EditProfile(db, user_id, profile_data)
     return Response(status_code=200, content="Profile updated successfully")
+
+
+@app.get("/api/insta-portfolio-metric")
+async def get_insta_portfolio_metric(influencer_id: str, db: Session = Depends(get_db)):
+    """Get Instagram portfolio metric"""
+    return GetInstaPortfolioMetric(db, influencer_id)
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000)

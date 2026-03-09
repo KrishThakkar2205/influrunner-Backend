@@ -62,7 +62,7 @@ async def verify_otp(request: VerifyOtp, db: Session = Depends(get_db)):
 @app.post("/auth/signup-final")
 async def signup_final(request: SignupFinal, db: Session = Depends(get_db)):
     try:
-        id = FinalSignup(
+        user = FinalSignup(
             db,
             email_id=request.email_id,
             min_price=request.min_price,
@@ -70,9 +70,9 @@ async def signup_final(request: SignupFinal, db: Session = Depends(get_db)):
             categories=request.categories,
             location=request.location
         )
-        if id:
-            token = CreateAccessToken(id)
-            return {"access_token":token, "type":"Bearer", "id":id}
+        if user:
+            token = CreateAccessToken(user["id"])
+            return {"access_token":token, "type":"Bearer", "id":user["id"], "name":user["name"], "profile_photo_location":user["profile_photo_location"]}
         return Response(status_code=400, content="User not found")
     except Exception as e:
         print(e)
@@ -81,10 +81,10 @@ async def signup_final(request: SignupFinal, db: Session = Depends(get_db)):
 @app.post("/auth/login")
 async def login(request: LoginSchema, db: Session = Depends(get_db)):
     try:
-        id = Login(db, email_id=request.email_id, password=request.password)
-        if id:
-            token = CreateAccessToken(id)
-            return {"access_token":token, "type":"Bearer", "id":id}
+        user = Login(db, email_id=request.email_id, password=request.password)
+        if user:
+            token = CreateAccessToken(user["id"])
+            return {"access_token":token, "type":"Bearer", "id":user["id"], "name":user["name"], "profile_photo_location":user["profile_photo_location"]}
         return Response(status_code=400, content="Invalid credentials")
     except Exception as e:
         print(e)

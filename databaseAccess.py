@@ -43,6 +43,7 @@ def VerifyOTP(db: Session, email_id: str, otp: int):
 def FinalSignup(db: Session, email_id: str, min_price: int, max_price: int, categories: list[str], location: str):
     influencer = db.query(Influencer).filter(Influencer.email_id == email_id).first()
     id = influencer.id
+    name = influencer.name
     if influencer and influencer.signup_status == "verified":
         influencer.min_price = min_price
         influencer.max_price = max_price
@@ -50,13 +51,21 @@ def FinalSignup(db: Session, email_id: str, min_price: int, max_price: int, cate
         influencer.signup_status = "completed"
         influencer.location = location
         db.commit()
-        return id
+        return {
+            "id":id,
+            "name":name,
+            "profile_photo_location":influencer.profile_picture_location
+        }
     return None
 
 def Login(db: Session, email_id: str, password: str):
     influencer = db.query(Influencer).filter(Influencer.email_id == email_id).first()
     if influencer and influencer.password_hash == password:
-        return influencer.id
+        return {
+            "id":influencer.id,
+            "name":influencer.name,
+            "profile_photo_location":influencer.profile_picture_location
+        }
     return None
 
 def GetProfile(db: Session, user_id: int):

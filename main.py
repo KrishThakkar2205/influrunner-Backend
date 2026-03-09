@@ -351,5 +351,13 @@ async def get_insta_metric_per_media(influencer_id: str, media_id: str, db: Sess
         return Response(status_code=400, content="Missing influencer_id or media_id")
     return GetInstaMetricPerMedia(db, influencer_id,media_id)
 
+@app.get("/api/dashboard-insta-metric")
+async def get_dashboard_insta_metric(db: Session = Depends(get_db), token: str = Depends(get_current_user)):
+    """Get Dashboard Instagram metric"""
+    user_id = VerifyAccessToken(token)
+    if not user_id:
+        return Response(status_code=401, content="Invalid token")
+    return GetInstaPortfolioMetric(db, user_id)
+
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000)

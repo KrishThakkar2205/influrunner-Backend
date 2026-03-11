@@ -34,7 +34,7 @@ app.add_middleware(
 
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(update_creds, 'interval', seconds=60)
+scheduler.add_job(update_creds, 'cron', hour=0, minute = 0, id = "update_creds")
 scheduler.start()
 
 @app.post("/auth/signup-initiate")

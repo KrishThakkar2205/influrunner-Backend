@@ -552,6 +552,11 @@ def GetInstaPortfolioMetric(db: Session, infleuncer_id: str):
     data = response.json()
     for item in data['data']:
         response_to_browser[item['name']] = item['total_value']['value']
+
+    url = f"https://graph.instagram.com/v25.0/{data['id']}/insights?metric=follower_demographics,engaged_audience_demographics&period=lifetime&timeframe=last_90_days&breakdown=age,city,country,gender&access_token={credentials.access_token}"
+    response = requests.get(url)
+    data = response.json()
+    print(data)
     return response_to_browser
 
 def GetInstaMetricPerMedia(db: Session, influencer_id: str, media_id: str):

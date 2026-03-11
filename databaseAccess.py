@@ -554,7 +554,7 @@ def GetInstaPortfolioMetric(db: Session, infleuncer_id: str):
     for item in data['data']:
         response_to_browser[item['name']] = item['total_value']['value']
 
-    url = f"https://graph.instagram.com/v25.0/{id}/insights?metric=follower_demographics&period=lifetime&timeframe=prev_month&breakdown=age,city,country,gender&metric_type=total_value&access_token={credentials.access_token}"
+    url = f"https://graph.instagram.com/v25.0/{id}/insights?metric=follower_demographics&period=lifetime&timeframe=prev_month&breakdowns=age,city,country,gender&metric_type=total_value&access_token={credentials.access_token}"
     response = requests.get(url)
     data = response.json()
     print(data)

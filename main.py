@@ -17,6 +17,8 @@ import requests
 import uuid
 import os
 import aiofiles
+from apscheduler.schedulers.background import BackgroundScheduler
+from backgound_workers.update_creds import update_creds
 
 UPLOAD_DIR = "uploads/profile_pictures"
 
@@ -29,6 +31,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+scheduler = BackgroundScheduler()
+scheduler.add_job(update_creds, 'interval', seconds=60)
+scheduler.start()
 
 @app.post("/auth/signup-initiate")
 async def signup_initiate(request: SignupInitiate, db: Session = Depends(get_db)):

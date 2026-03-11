@@ -12,3 +12,4 @@ pydantic[email]
 python-jose[cryptography]
 aiofiles
 python-multipart
+apscheduler

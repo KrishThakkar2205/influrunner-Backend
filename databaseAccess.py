@@ -551,6 +551,7 @@ def GetInstaPortfolioMetric(db: Session, infleuncer_id: str):
     url = f"https://graph.instagram.com/v25.0/{id}/insights?metric={metrices}&period=day&since={since}&until={until}&metric_type=total_value&access_token={credentials.access_token}"
     response = requests.get(url)
     data = response.json()
+    print(data)
     for item in data['data']:
         response_to_browser[item['name']] = item['total_value']['value']
 

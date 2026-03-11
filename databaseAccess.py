@@ -547,13 +547,14 @@ def GetInstaPortfolioMetric(db: Session, infleuncer_id: str):
     # 30 days from now
     since = int((datetime.utcnow() - timedelta(days=30)).timestamp())
     until = int((datetime.utcnow().timestamp()))
-    url = f"https://graph.instagram.com/v25.0/{data['id']}/insights?metric={metrices}&period=day&since={since}&until={until}&metric_type=total_value&access_token={credentials.access_token}"
+    id = data['id']
+    url = f"https://graph.instagram.com/v25.0/{id}/insights?metric={metrices}&period=day&since={since}&until={until}&metric_type=total_value&access_token={credentials.access_token}"
     response = requests.get(url)
     data = response.json()
     for item in data['data']:
         response_to_browser[item['name']] = item['total_value']['value']
 
-    url = f"https://graph.instagram.com/v25.0/{data['id']}/insights?metric=follower_demographics,engaged_audience_demographics&period=lifetime&timeframe=last_90_days&breakdown=age,city,country,gender&access_token={credentials.access_token}"
+    url = f"https://graph.instagram.com/v25.0/{id}/insights?metric=follower_demographics,engaged_audience_demographics&period=lifetime&timeframe=last_90_days&breakdown=age,city,country,gender&access_token={credentials.access_token}"
     response = requests.get(url)
     data = response.json()
     print(data)

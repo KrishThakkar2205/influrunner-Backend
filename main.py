@@ -35,9 +35,15 @@ app.add_middleware(
 
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(update_creds, 'cron', hour=0, minute = 0, id = "update_creds")
-scheduler.add_job(send_shoot_upload_reminder, 'interval', minutes=1, id = "send_shoot_upload_reminder")
-scheduler.start()
+@app.on_event("startup")
+def start_scheduler():
+    scheduler.add_job(update_creds, 'cron', hour=0, minute = 0, id = "update_creds")
+    scheduler.add_job(send_shoot_upload_reminder, 'interval', minutes=1, id = "send_shoot_upload_reminder")
+    scheduler.start()
+
+@app.on_event("shutdown")
+def stop_scheduler():
+    scheduler.shutdown()
 
 @app.post("/auth/signup-initiate")
 async def signup_initiate(request: SignupInitiate, db: Session = Depends(get_db)):

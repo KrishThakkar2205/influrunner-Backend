@@ -21,7 +21,7 @@ def send_shoot_upload_reminder():
                     "type": "text",
                     "text": {
                         "preview_url": False,   # True if you want link preview
-                        "body": "Shoot Remainder\n\nDear Infleuncer you have shoot today at {shoot.shoot_time} at {shoot.location}"
+                        "body": f"Shoot Remainder\n\nDear Infleuncer you have shoot today of {shoot.brand_name} at {shoot.shoot_time} at {shoot.location}\n\nNotes of the Shoot {shoot.notes}"
                     }
                 }
             response = requests.post(url, headers=headers, json=payload)

@@ -230,7 +230,7 @@ async def connect_social_media(request: Request, platform: str, db: Session = De
     if platform not in ["instagram", "facebook", "youtube"]:
         raise HTTPException(status_code=400, detail="Invalid platform")
     if platform == "instagram":
-        url = f"https://www.instagram.com/oauth/authorize?force_reauth=true&client_id=2447536092327866&redirect_uri=https://api.influrunner.com/redirect/instagram&response_type=code&state={user_id}&scope=instagram_business_basic%2Cinstagram_business_manage_messages%2Cinstagram_business_manage_comments%2Cinstagram_business_content_publish%2Cinstagram_business_manage_insights"
+        url = f"https://www.instagram.com/oauth/authorize?force_reauth=true&client_id=1780741403310636&redirect_uri=https://api.influrunner.com/redirect/instagram&response_type=code&state={user_id}&scope=instagram_business_basic%2Cinstagram_business_manage_messages%2Cinstagram_business_manage_comments%2Cinstagram_business_content_publish%2Cinstagram_business_manage_insights"
         return {"url": url}
 
 @app.get("/redirect/instagram")
@@ -242,8 +242,8 @@ async def instagram_redirect(code: str, state: str, db: Session = Depends(get_db
         url = "https://api.instagram.com/oauth/access_token"
 
         payload = {
-            "client_id": "2447536092327866",
-            "client_secret": "68d658c3f4e135f6f8e289f0af95def4",
+            "client_id": "1780741403310636",
+            "client_secret": "fa13fbc50f5ffc6d3fbc3cdce088b045",
             "grant_type": "authorization_code",
             "redirect_uri": "https://api.influrunner.com/redirect/instagram",
             "code": code
@@ -257,7 +257,7 @@ async def instagram_redirect(code: str, state: str, db: Session = Depends(get_db
         # Exchanging the short lived access token for the long live access token
         url = "https://graph.instagram.com/access_token"
         payload = {
-            "client_secret": "68d658c3f4e135f6f8e289f0af95def4",
+            "client_secret": "fa13fbc50f5ffc6d3fbc3cdce088b045",
             "grant_type": "ig_exchange_token",
             "access_token" : temp_access_token,
         }

@@ -6,10 +6,10 @@ import requests
 def send_shoot_upload_reminder():
     db = SessionLocal()
     try:
-        url = "https://graph.facebook.com/v25.0/948781308327986/messages"        
+        url = "https://graph.facebook.com/v25.0/1025620817303779/messages"        
         headers = {
             "Content-Type": "application/json",
-            "Authorization": "Bearer EAANLSkTxaEgBQZC6a5tIBZCzN3uQoNCenjzBHctbaI09IuNkwi9ULEPhN7Q5D9eMhXvTvCznXv4cesZBZA7FN6RNZBdZCsRchd2NwsJ4oz8byaDXeFDb6RxrSeaPi6R3iqQ7R9rJfVSuAPSknE7WSAYUBGCmxDUMF8vfgSP2quLa6jlqaMT3Yr3a3BzCNKaTeArkTBvx5yVshf2pTo7SyRpo2f9nVQapDIEA5Mi59aZC0cRl0GW4PwlUcV2AZAjHEGgFZA571kbPjzombLQxbluWPCaZB2Vs0MS4z1BX4e8wZDZD"
+            "Authorization": "Bearer EAANhtEqdFqUBQZCYIZBWCMO9Mkr1ZBNZBghvkuRcO6XhcJAZAxec0Rn3Ur3dSH5bAo39R9WEZBcFEQmpGNjCW56jAp98TDKa2nbT3Ibp9R8LL91VolZBuybBisCztovTeLYfMB4bSLdKnsGb83CzoJb03rZAA7lBcdYYaQ64qjVWQZCWGZCD5fgSz81RxLx9tueBrDgUq8RbQsaFOZCM5Tt69rhtt1hfyoNbiU4j6UQbshbmiT1fc73Y2OQDDP2cFPZCxzH0kwj7hQaVDMXrRGmFQdv4"
         }
         now = datetime.utcnow().date()
         shoot = db.query(Shoots).filter(Shoots.shoot_date == now).first()

@@ -19,6 +19,7 @@ import os
 import aiofiles
 from apscheduler.schedulers.background import BackgroundScheduler
 from backgound_workers.update_creds import update_creds
+from backgound_workers.whatsapp_shoot_upload_reaminder import send_shoot_upload_reminder
 
 UPLOAD_DIR = "uploads/profile_pictures"
 
@@ -35,6 +36,7 @@ app.add_middleware(
 
 scheduler = BackgroundScheduler()
 scheduler.add_job(update_creds, 'cron', hour=0, minute = 0, id = "update_creds")
+scheduler.add_job(send_shoot_upload_reminder, 'interval', minutes=1, id = "send_shoot_upload_reminder")
 scheduler.start()
 
 @app.post("/auth/signup-initiate")

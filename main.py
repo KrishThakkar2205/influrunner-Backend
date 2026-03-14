@@ -38,7 +38,7 @@ scheduler = BackgroundScheduler()
 @app.on_event("startup")
 def start_scheduler():
     scheduler.add_job(update_creds, 'cron', hour=0, minute = 0, id = "update_creds")
-    scheduler.add_job(send_shoot_upload_reminder, 'interval', minutes=1, id = "send_shoot_upload_reminder")
+    scheduler.add_job(send_shoot_reminder_bfr_2hr, 'interval', minutes=1, id = "send_shoot_reminder_bfr_2hr")
     scheduler.start()
 
 @app.on_event("shutdown")

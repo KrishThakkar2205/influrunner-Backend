@@ -42,6 +42,8 @@ class Uploads(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     deleted = Column(Boolean, default=False)
     deleted_at = Column(DateTime, nullable=True)
+    notify_before_2hr = Column(Boolean, default=False)
+    notify_before_1hr = Column(Boolean, default=False)
 
 class Shoots(Base):
     __tablename__ = "shoots"
@@ -60,6 +62,8 @@ class Shoots(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     deleted = Column(Boolean, default=False)
     deleted_at = Column(DateTime, nullable=True)
+    notify_before_2hr = Column(Boolean, default=False)
+    notify_before_1hr = Column(Boolean, default=False)
     review_generated = Column(Boolean, default=False)
 
 class Credentials(Base):

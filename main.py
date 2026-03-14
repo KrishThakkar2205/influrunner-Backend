@@ -27,7 +27,7 @@ app = FastAPI()
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://influrunner.com"],  # production me specific domain use karna
+    allow_origins=["*"],  # production me specific domain use karna
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

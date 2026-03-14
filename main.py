@@ -19,7 +19,7 @@ import os
 import aiofiles
 from apscheduler.schedulers.background import BackgroundScheduler
 from backgound_workers.update_creds import update_creds
-from backgound_workers.whatsapp_shoot_upload_reaminder import send_shoot_upload_reminder
+from backgound_workers.whatsapp_shoot_upload_reaminder import send_shoot_reminder_bfr_2hr
 
 UPLOAD_DIR = "uploads/profile_pictures"
 

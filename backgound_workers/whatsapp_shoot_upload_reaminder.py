@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from database import SessionLocal
 from models import Shoots, Uploads,Influencer
+from zoneinfo import ZoneInfo
 import requests
 
 def send_shoot_reminder_bfr_2hr():
@@ -18,6 +19,8 @@ def send_shoot_reminder_bfr_2hr():
         for shoot in shoots:
             shoot_date_time = datetime.combine(shoot.shoot_date, shoot.shoot_time)
             diff = shoot_date_time - now
+            ist_time = shoot_date_time.astimezone(ZoneInfo("Asia/Kolkata"))
+            formatted_time = ist_time.strftime("%I:%M %p")
             if timedelta(hours=1, minutes=55) <= diff <= timedelta(hours=2):
                 infleuncer = db.query(Influencer.name, Influencer.phone_number).filter(Influencer.id == shoot.influencer_id).first()
                 payload = { 
@@ -27,7 +30,7 @@ def send_shoot_reminder_bfr_2hr():
                     "type": "text",
                     "text": {
                         "preview_url": False,   # True if you want link preview
-                        "body": f"*Shoot Remainder*\n\nDear {infleuncer.name} you have shoot today\n\n Brand Name : {shoot.brand_name}\n Shoot Time : {shoot.shoot_time}\n Location : {shoot.location}\n\nNotes : {shoot.notes}\n\n Be On time \n InfluRunner Team"
+                        "body": f"*Shoot Remainder*\n\nDear {infleuncer.name} you have shoot today\n\nBrand Name : {shoot.brand_name}\nShoot Time : {formatted_time}\nLocation : {shoot.location}\n\nNotes : {shoot.notes}\n\nBe On time\nThis notification is sent 2 hours before the shoot\n\nInfluRunner Team"
                     }
                 }
                 response = requests.post(url, headers=headers, json=payload)

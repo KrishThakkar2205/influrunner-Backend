@@ -32,8 +32,8 @@ def send_shoot_reminder_bfr_2hr():
                     "to": infleuncer.phone_number,
                     "type": "text",
                     "text": {
-                        "preview_url": False,   # True if you want link preview
-                        "body": f"*Shoot Remainder*\n\nDear {infleuncer.name} you have shoot today\n\nBrand Name : {shoot.brand_name}\nShoot Time : {formatted_time}\nLocation : {shoot.location}\n\nNotes : {shoot.notes}\n\nBe On time\nThis notification is sent 2 hours before the shoot\n\nInfluRunner Team"
+                        "preview_url": True,   # True if you want link preview
+                        "body": f"*Shoot Remainder*\n\nDear {infleuncer.name} you have shoot today\n\nBrand Name : {shoot.brand_name}\nShoot Time : {formatted_time}\nLocation : {shoot.location}\n\nNotes : {shoot.notes}\n\nBe On time\nThis notification is sent 2 hours before the shoot\n\nInfluRunner Team\nhttps://influrunner.com/influencer/schedule"
                     }
                 }
                 response = requests.post(url, headers=headers, json=payload)
@@ -72,8 +72,8 @@ def send_shoot_reminder_bfr_1hr():
                     "to": infleuncer.phone_number,
                     "type": "text",
                     "text": {
-                        "preview_url": False,   # True if you want link preview
-                        "body": f"*Shoot Remainder*\n\nDear {infleuncer.name} you have shoot today\n\nBrand Name : {shoot.brand_name}\nShoot Time : {formatted_time}\nLocation : {shoot.location}\n\nNotes : {shoot.notes}\n\nBe On time\nThis notification is sent 1 hour before the shoot\n\nInfluRunner Team"
+                        "preview_url": True,   # True if you want link preview
+                        "body": f"*Shoot Remainder*\n\nDear {infleuncer.name} you have shoot today\n\nBrand Name : {shoot.brand_name}\nShoot Time : {formatted_time}\nLocation : {shoot.location}\n\nNotes : {shoot.notes}\n\nBe On time\nThis notification is sent 1 hour before the shoot\n\nInfluRunner Team\nhttps://influrunner.com/influencer/schedule"
                     }
                 }
                 response = requests.post(url, headers=headers, json=payload)

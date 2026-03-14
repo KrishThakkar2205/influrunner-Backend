@@ -4,13 +4,16 @@ from models import Shoots, Uploads,Influencer
 from zoneinfo import ZoneInfo
 import requests
 
+
+access_token_for_waba = "EAANhtEqdFqUBQZC2TnvE5xqZBglHEKehpxzZAabMCSFxkZA624fkq6ZBoiu333RjhbzGTfnEAJe73czUx72dqJL4Oy6UV4ok9WhtGCr3jemTNf55Hdkc2kJhlFJeGzQh9ZBoznGFTyFU2sxIeuglMxPwLlW5DzyaVb1IEv25L8bouctVr8eOyuNZBObyf2jJNgGrxxmrG2ZAXg7Ojqdvzd6ZCuzd4SlERtucnHSfpfGiRMz9paDCl6sxXFDIcii0cBZB1uCPF6dBsveIBxKIlcAD6i"
+
 def send_shoot_reminder_bfr_2hr():
     db = SessionLocal()
     try:
         url = "https://graph.facebook.com/v25.0/1025620817303779/messages"        
         headers = {
             "Content-Type": "application/json",
-            "Authorization": "Bearer EAANhtEqdFqUBQymTuPHJNSiC1DYTHQo1Oq3t8ZB9QZAhDpr4s0mI64adoWNEQrI01fV5H41yTBg8uRc7S4ysjgJNRGdxiXmTezmkGgCkK6A9JRRrzEZBTFj5YTbtcvV6JZARaESI4DZBA7aNEMqgLWKWefPsVKh2QzbFZCXwu38WbxdonTLgY8IboZAHqXsFBAfrJeoFyX5SvxdbrooeyXhP5L9sveH0mhg3Quev2ugsZCsRhsPpYNz3SI7NO5vSRjZAkowf4E9cXIeGFLINbZAaAEOwZDZD"
+            "Authorization": f"Bearer {access_token_for_waba}"
         }
         now = datetime.utcnow()
         # time = datetime.utcnow().time()
@@ -50,7 +53,7 @@ def send_shoot_reminder_bfr_1hr():
         url = "https://graph.facebook.com/v25.0/1025620817303779/messages"        
         headers = {
             "Content-Type": "application/json",
-            "Authorization": "Bearer EAANhtEqdFqUBQymTuPHJNSiC1DYTHQo1Oq3t8ZB9QZAhDpr4s0mI64adoWNEQrI01fV5H41yTBg8uRc7S4ysjgJNRGdxiXmTezmkGgCkK6A9JRRrzEZBTFj5YTbtcvV6JZARaESI4DZBA7aNEMqgLWKWefPsVKh2QzbFZCXwu38WbxdonTLgY8IboZAHqXsFBAfrJeoFyX5SvxdbrooeyXhP5L9sveH0mhg3Quev2ugsZCsRhsPpYNz3SI7NO5vSRjZAkowf4E9cXIeGFLINbZAaAEOwZDZD"
+            "Authorization": f"Bearer {access_token_for_waba}"
         }
         now = datetime.utcnow()
         # time = datetime.utcnow().time()

@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import func, case
-from models import Influencer, Shoots, Uploads, Reviews, Credentials
+from models import Influencer, Shoots, Uploads, Reviews, Credentials, DeviceTokens
 from datetime import datetime, timedelta
 from datetime import date, time
 from fastapi import HTTPException
@@ -577,3 +577,22 @@ def GetInstaMetricPerMedia(db: Session, influencer_id: str, media_id: str):
     for item in data['data']:
         response_to_browser[item['name']] = item['values'][0]['value']
     return response_to_browser
+
+def RegisterToken(db: Session, influencer_id: str, device_token: str, device_type: str):
+    token = db.query(DeviceTokens).filter(
+        DeviceTokens.influencer_id == influencer_id,
+        DeviceTokens.device_token == device_token
+    ).first()
+    if token:
+        token.device_type = device_type
+        token.created_at = datetime.utcnow()
+        db.commit()
+        return True
+    token = DeviceTokens(
+        influencer_id=influencer_id,
+        device_token=device_token,
+        device_type=device_type
+    )
+    db.add(token)
+    db.commit()
+    return True

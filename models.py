@@ -96,3 +96,15 @@ class Reviews(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     deleted = Column(Boolean, default=False)
     deleted_at = Column(DateTime, nullable=True)
+
+
+class DeviceTokens(Base):
+    __tablename__ = "device_tokens"
+
+    id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    influencer_id = Column(String, ForeignKey("influencers.id"), nullable=False)
+    device_token = Column(String, nullable=False)
+    device_type = Column(String, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    deleted = Column(Boolean, default=False)
+    deleted_at = Column(DateTime, nullable=True)

@@ -4,7 +4,7 @@ from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from database import get_db
 from sqlalchemy.orm import Session
-from databaseAccess import GetInstaMetricPerMedia, GetInstaMediaPortfolioMetric, GetInstaPortfolioMetric, EditProfile, GetPortfolio, SubmitReview, GetReviews, GetDashboard, AddSocialMedia, ValidateReviewToken, AddInfluencers, VerifyOTP, FinalSignup, Login, GetProfile, AddShoot, GetShoots, UpdateShoot, DeleteShoot,AddUpload, GetUploads, GetUpload,UpdateUploads, DeleteUpload, GenerateReview
+from databaseAccess import RegisterToken, GetInstaMetricPerMedia, GetInstaMediaPortfolioMetric, GetInstaPortfolioMetric, EditProfile, GetPortfolio, SubmitReview, GetReviews, GetDashboard, AddSocialMedia, ValidateReviewToken, AddInfluencers, VerifyOTP, FinalSignup, Login, GetProfile, AddShoot, GetShoots, UpdateShoot, DeleteShoot,AddUpload, GetUploads, GetUpload,UpdateUploads, DeleteUpload, GenerateReview
 from schema.auth import ReviewResponse,SignupInitiate, VerifyOtp, SignupFinal, LoginSchema, ShootCreate, ShootUpdate, UploadCreate, UploadResponse, UploadUpdate, ReviewSubmit
 from maiService import send_otp_email
 from accessToken import CreateAccessToken, VerifyAccessToken
@@ -19,7 +19,9 @@ import os
 import aiofiles
 from apscheduler.schedulers.background import BackgroundScheduler
 from backgound_workers.update_creds import update_creds
+import firebase.firebase_config
 from backgound_workers.whatsapp_shoot_upload_reaminder import send_shoot_reminder_bfr_2hr, send_shoot_reminder_bfr_1hr
+
 
 UPLOAD_DIR = "uploads/profile_pictures"
 
@@ -374,6 +376,19 @@ async def get_dashboard_insta_metric(db: Session = Depends(get_db), token: str =
     if not user_id:
         return Response(status_code=401, content="Invalid token")
     return GetInstaPortfolioMetric(db, user_id)
+
+@app.post("/api/notifications/register-token")
+async def register_token(request: Request, db: Session = Depends(get_db), token: str = Depends(get_current_user)):
+    """Register device token"""
+    user_id = VerifyAccessToken(token)
+    if not user_id:
+        return Response(status_code=401, content="Invalid token")
+    data = await request.json()
+    device_token = data.get("token")
+    device_type = data.get("platform")
+    if RegisterToken(db, user_id, device_token, device_type):
+        return Response(status_code=200, content="Token registered successfully")
+    return Response(status_code=400, content="Token not registered")
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000)

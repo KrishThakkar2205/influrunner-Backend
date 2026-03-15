@@ -41,7 +41,7 @@ scheduler = BackgroundScheduler()
 @app.on_event("startup")
 def start_scheduler():
     scheduler.add_job(update_creds, 'cron', hour=0, minute = 0, id = "update_creds")
-    scheduler.add_job(connect_instagram, 'cron', hour=0, minute = 0, id = "connect_instagram")
+    scheduler.add_job(connect_instagram, 'cron', hour=0, minute = 10, id = "connect_instagram")
     scheduler.add_job(send_shoot_reminder_bfr_2hr, 'interval', minutes=1, id = "send_shoot_reminder_bfr_2hr")
     scheduler.add_job(send_shoot_reminder_bfr_1hr, 'interval', minutes=1, id = "send_shoot_reminder_bfr_1hr")
     scheduler.start()

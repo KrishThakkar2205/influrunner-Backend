@@ -27,7 +27,7 @@ def send_shoot_reminder_bfr_2hr():
             formatted_time = ist_time.strftime("%I:%M %p")
             if timedelta(hours=1, minutes=55) <= diff <= timedelta(hours=2):
                 infleuncer = db.query(Influencer.name, Influencer.phone_number).filter(Influencer.id == shoot.influencer_id).first()
-                device_token = db.query(DeviceTokens.device_token).filter(DeviceTokens.user_id == shoot.influencer_id).all()
+                device_token = db.query(DeviceTokens.device_token).filter(DeviceTokens.influencer_id == shoot.influencer_id).all()
                 for token in device_token:
                     status = send_notification(token.device_token, "Shoot Remainder Before 2 hour", f"Brand Name : {shoot.brand_name}\nShoot Time : {formatted_time}\nLocation : {shoot.location}\n\nNotes : {shoot.notes}\n\nBe On time")
                 # payload = { 
@@ -70,7 +70,7 @@ def send_shoot_reminder_bfr_1hr():
             formatted_time = ist_time.strftime("%I:%M %p")
             if timedelta(minutes=55) <= diff <= timedelta(hours=1):
                 infleuncer = db.query(Influencer.name, Influencer.phone_number).filter(Influencer.id == shoot.influencer_id).first()
-                device_token = db.query(DeviceTokens.device_token).filter(DeviceTokens.user_id == shoot.influencer_id).all()
+                device_token = db.query(DeviceTokens.device_token).filter(DeviceTokens.influencer_id == shoot.influencer_id).all()
                 for token in device_token:
                     status = send_notification(token.device_token, "Shoot Remainder Before 2 hour", f"Brand Name : {shoot.brand_name}\nShoot Time : {formatted_time}\nLocation : {shoot.location}\n\nNotes : {shoot.notes}\n\nBe On time")
                 # payload = { 

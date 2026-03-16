@@ -29,7 +29,15 @@ def send_shoot_reminder_bfr_2hr():
                 infleuncer = db.query(Influencer.name, Influencer.phone_number).filter(Influencer.id == shoot.influencer_id).first()
                 device_token = db.query(DeviceTokens.device_token).filter(DeviceTokens.influencer_id == shoot.influencer_id).all()
                 for token in device_token:
-                    status = send_notification(token.device_token, "Shoot Remainder Before 2 hour", f"Brand Name : {shoot.brand_name}\nShoot Time : {formatted_time}\nLocation : {shoot.location}\n\nNotes : {shoot.notes}\n\nBe On time")
+                    try:
+                        status = send_notification(token.device_token, "Shoot Remainder Before 2 hour", f"Brand Name : {shoot.brand_name}\nShoot Time : {formatted_time}\nLocation : {shoot.location}\n\nNotes : {shoot.notes}\n\nBe On time")
+                        if status != 200:
+                            print(f"Failed to send shoot upload reminder for shoot {shoot.id}")
+                        else:
+                            shoot.notify_before_2hr = True
+                            db.commit()
+                    except Exception as e:
+                        print(e)
                 # payload = { 
                 #     "messaging_product": "whatsapp",
                 #     "recipient_type": "individual",
@@ -41,11 +49,6 @@ def send_shoot_reminder_bfr_2hr():
                 #     }
                 # }
                 # response = requests.post(url, headers=headers, json=payload)
-                    if not status:
-                        print(f"Failed to send shoot upload reminder for shoot {shoot.id}")
-                    else:
-                        shoot.notify_before_2hr = True
-                        db.commit()
     except Exception as e:
         print(e)
     finally:
@@ -72,7 +75,9 @@ def send_shoot_reminder_bfr_1hr():
                 infleuncer = db.query(Influencer.name, Influencer.phone_number).filter(Influencer.id == shoot.influencer_id).first()
                 device_token = db.query(DeviceTokens.device_token).filter(DeviceTokens.influencer_id == shoot.influencer_id).all()
                 for token in device_token:
-                    status = send_notification(token.device_token, "Shoot Remainder Before 2 hour", f"Brand Name : {shoot.brand_name}\nShoot Time : {formatted_time}\nLocation : {shoot.location}\n\nNotes : {shoot.notes}\n\nBe On time")
+                    try:
+                        status = send_notification(token.device_token, "Shoot Remainder Before 1 hour", f"Brand Name : {shoot.brand_name}\nShoot Time : {formatted_time}\nLocation : {shoot.location}\n\nNotes : {shoot.notes}\n\nBe On time")
+                    
                 # payload = { 
                 #     "messaging_product": "whatsapp",
                 #     "recipient_type": "individual",
@@ -84,11 +89,13 @@ def send_shoot_reminder_bfr_1hr():
                 #     }
                 # }
                 # response = requests.post(url, headers=headers, json=payload)
-                    if status != 200:
-                        print(f"Failed to send shoot upload reminder for shoot {shoot.id}")
-                    else:
-                        shoot.notify_before_1hr = True
-                        db.commit()
+                        if status != 200:
+                            print(f"Failed to send shoot upload reminder for shoot {shoot.id}")
+                        else:
+                            shoot.notify_before_1hr = True
+                            db.commit()
+                    except Exception as e:
+                        print(e)
     except Exception as e:
         print(e)
     finally:

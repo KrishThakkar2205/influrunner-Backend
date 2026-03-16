@@ -11,15 +11,17 @@ access_token_for_waba = "EAANhtEqdFqUBQZC2TnvE5xqZBglHEKehpxzZAabMCSFxkZA624fkq6
 def send_shoot_reminder_bfr_2hr():
     db = SessionLocal()
     try:
-        # url = "https://graph.facebook.com/v25.0/1025620817303779/messages"        
-        # headers = {
-        #     "Content-Type": "application/json",
-        #     "Authorization": f"Bearer {access_token_for_waba}"
-        # }
         now = datetime.utcnow().replace(tzinfo=ZoneInfo("UTC"))
-        # time = datetime.utcnow().time()
+        print(f"[2HR] Current UTC time: {now}")
 
-        shoots = db.query(Shoots).filter(Shoots.shoot_date == now.date(), Shoots.completed == False, Shoots.notify_before_2hr == False).all()
+        shoots = db.query(Shoots).filter(
+            Shoots.shoot_date == now.date(),
+            Shoots.completed == False,
+            Shoots.notify_before_2hr == False
+        ).all()
+        
+        print(f"[2HR] Shoots found for today: {len(shoots)}")  # ✅ check if shoots are being fetched
+
         for shoot in shoots:
             shoot_date_time = datetime.combine(shoot.shoot_date, shoot.shoot_time)
             shoot_date_time_utc = shoot_date_time.replace(tzinfo=ZoneInfo("UTC"))
@@ -27,11 +29,15 @@ def send_shoot_reminder_bfr_2hr():
             ist_time = shoot_date_time_utc.astimezone(ZoneInfo("Asia/Kolkata"))
             formatted_time = ist_time.strftime("%I:%M %p")
 
-            if timedelta(hours=1, minutes=55) <= diff <= timedelta(hours=2):
-                influencer = db.query(Influencer.name, Influencer.phone_number).filter(Influencer.id == shoot.influencer_id).first()
-                device_tokens = db.query(DeviceTokens.device_token).filter(DeviceTokens.influencer_id == shoot.influencer_id).all()
+            print(f"[2HR] Shoot ID: {shoot.id} | UTC time: {shoot_date_time_utc} | IST: {formatted_time} | Diff: {diff}")  # ✅ check diff value
 
-                all_sent = True  # Track if at least one succeeded
+            if timedelta(hours=1, minutes=55) <= diff <= timedelta(hours=2):
+                print(f"[2HR] ✅ Shoot {shoot.id} is within 2hr window, sending notification...")
+                device_tokens = db.query(DeviceTokens.device_token).filter(
+                    DeviceTokens.influencer_id == shoot.influencer_id
+                ).all()
+                print(f"[2HR] Device tokens found: {len(device_tokens)}")  # ✅ check if tokens exist
+
                 for token in device_tokens:
                     try:
                         status = send_notification(
@@ -39,19 +45,19 @@ def send_shoot_reminder_bfr_2hr():
                             "Shoot Reminder Before 2 Hours",
                             f"Brand Name : {shoot.brand_name}\nShoot Time : {formatted_time}\nLocation : {shoot.location}\n\nNotes : {shoot.notes}\n\nBe On time"
                         )
+                        print(f"[2HR] Notification status for token {token.device_token}: {status}")  # ✅ check response
                         if status != 200:
-                            print(f"Failed to send notification for shoot {shoot.id}, token {token.device_token}")
-                            all_sent = False
+                            print(f"[2HR] ❌ Failed for shoot {shoot.id}")
                     except Exception as e:
-                        print(f"Exception for shoot {shoot.id}: {e}")
-                        all_sent = False
+                        print(f"[2HR] ❌ Exception: {e}")
 
-                # ✅ Set flag AFTER the loop, outside try/except of individual tokens
-                # Mark as notified even if some tokens failed — prevents infinite retries
                 shoot.notify_before_2hr = True
                 db.commit()
+            else:
+                print(f"[2HR] ⏭ Shoot {shoot.id} NOT in window. Diff={diff}")  # ✅ tells you why it was skipped
+
     except Exception as e:
-        print(e)
+        print(f"[2HR] ❌ Outer exception: {e}")
     finally:
         db.close()
 

@@ -16,13 +16,14 @@ def send_shoot_reminder_bfr_2hr():
         #     "Content-Type": "application/json",
         #     "Authorization": f"Bearer {access_token_for_waba}"
         # }
-        now = datetime.utcnow()
+        now = datetime.utcnow().replace(tzinfo=ZoneInfo("UTC"))
         # time = datetime.utcnow().time()
 
         shoots = db.query(Shoots).filter(Shoots.shoot_date == now.date(), Shoots.completed == False, Shoots.notify_before_2hr == False).all()
         for shoot in shoots:
             shoot_date_time = datetime.combine(shoot.shoot_date, shoot.shoot_time)
-            diff = shoot_date_time - now
+            shoot_date_time_utc = shoot_date_time.replace(tzinfo=ZoneInfo("UTC"))
+            diff = shoot_date_time_utc - now
             ist_time = shoot_date_time.astimezone(ZoneInfo("Asia/Kolkata"))
             formatted_time = ist_time.strftime("%I:%M %p")
 
@@ -57,11 +58,12 @@ def send_shoot_reminder_bfr_2hr():
 def send_shoot_reminder_bfr_1hr():
     db = SessionLocal()
     try:
-        now = datetime.utcnow()
+        now = datetime.utcnow().replace(tzinfo=ZoneInfo("UTC"))
         shoots = db.query(Shoots).filter(Shoots.shoot_date == now.date(), Shoots.completed == False, Shoots.notify_before_1hr == False).all()
         for shoot in shoots:
             shoot_date_time = datetime.combine(shoot.shoot_date, shoot.shoot_time)
-            diff = shoot_date_time - now
+            shoot_date_time_utc = shoot_date_time.replace(tzinfo=ZoneInfo("UTC"))
+            diff = shoot_date_time_utc - now
             ist_time = shoot_date_time.astimezone(ZoneInfo("Asia/Kolkata"))
             formatted_time = ist_time.strftime("%I:%M %p")
             if timedelta(minutes=55) <= diff <= timedelta(hours=1):
@@ -74,7 +76,7 @@ def send_shoot_reminder_bfr_1hr():
                             print(f"Failed to send shoot upload reminder for shoot {shoot.id}")
                     except Exception as e:
                         print(e)
-                shoot.notify_before_1hr == True
+                shoot.notify_before_1hr = True
                 db.commit()
     except Exception as e:
         print(e)

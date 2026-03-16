@@ -7,6 +7,7 @@ from fastapi import HTTPException
 import requests
 from typing import Optional
 from schema.auth import ShootUpdate, UploadCreate, UploadUpdate, ReviewSubmit
+import bcrypt
 
 def AddInfluencers(db: Session, name: str, email_id: str, phone_number: str, password: str, otp: int):
     influencer = db.query(Influencer).filter(Influencer.email_id == email_id).first()
@@ -22,7 +23,7 @@ def AddInfluencers(db: Session, name: str, email_id: str, phone_number: str, pas
             name=name,
             email_id=email_id,
             phone_number=phone_number,
-            password_hash=password,
+            password_hash=bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()),
             signup_otp=str(otp),
         )
         db.add(influencer)
@@ -60,7 +61,7 @@ def FinalSignup(db: Session, email_id: str, min_price: int, max_price: int, cate
 
 def Login(db: Session, email_id: str, password: str):
     influencer = db.query(Influencer).filter(Influencer.email_id == email_id).first()
-    if influencer and influencer.password_hash == password:
+    if influencer and bcrypt.checkpw(password.encode('utf-8'), influencer.password_hash.encode('utf-8')):
         return {
             "id":influencer.id,
             "name":influencer.name,

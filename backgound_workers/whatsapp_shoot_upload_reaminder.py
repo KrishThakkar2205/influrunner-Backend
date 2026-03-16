@@ -24,7 +24,7 @@ def send_shoot_reminder_bfr_2hr():
             shoot_date_time = datetime.combine(shoot.shoot_date, shoot.shoot_time)
             shoot_date_time_utc = shoot_date_time.replace(tzinfo=ZoneInfo("UTC"))
             diff = shoot_date_time_utc - now
-            ist_time = shoot_date_time.astimezone(ZoneInfo("Asia/Kolkata"))
+            ist_time = shoot_date_time_utc.astimezone(ZoneInfo("Asia/Kolkata"))
             formatted_time = ist_time.strftime("%I:%M %p")
 
             if timedelta(hours=1, minutes=55) <= diff <= timedelta(hours=2):
@@ -64,7 +64,7 @@ def send_shoot_reminder_bfr_1hr():
             shoot_date_time = datetime.combine(shoot.shoot_date, shoot.shoot_time)
             shoot_date_time_utc = shoot_date_time.replace(tzinfo=ZoneInfo("UTC"))
             diff = shoot_date_time_utc - now
-            ist_time = shoot_date_time.astimezone(ZoneInfo("Asia/Kolkata"))
+            ist_time = shoot_date_time_utc.astimezone(ZoneInfo("Asia/Kolkata"))
             formatted_time = ist_time.strftime("%I:%M %p")
             if timedelta(minutes=55) <= diff <= timedelta(hours=1):
                 infleuncer = db.query(Influencer.name, Influencer.phone_number).filter(Influencer.id == shoot.influencer_id).first()

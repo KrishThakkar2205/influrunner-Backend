@@ -23,7 +23,7 @@ def AddInfluencers(db: Session, name: str, email_id: str, phone_number: str, pas
             name=name,
             email_id=email_id,
             phone_number=phone_number,
-            password_hash=bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()),
+            password_hash=bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8'),
             signup_otp=str(otp),
         )
         db.add(influencer)

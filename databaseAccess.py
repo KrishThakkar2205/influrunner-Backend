@@ -61,7 +61,7 @@ def FinalSignup(db: Session, email_id: str, min_price: int, max_price: int, cate
 
 def Login(db: Session, email_id: str, password: str):
     influencer = db.query(Influencer).filter(Influencer.email_id == email_id).first()
-    if influencer and bcrypt.checkpw(password.encode('utf-8'), influencer.password_hash.encode('utf-8')):
+    if influencer and bcrypt.checkpw(password.encode('utf-8'), influencer.password_hash):
         return {
             "id":influencer.id,
             "name":influencer.name,

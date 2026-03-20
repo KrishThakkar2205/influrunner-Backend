@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import func, case
-from models import Influencer, Shoots, Uploads, Reviews, Credentials, DeviceTokens
+from models import Influencer, Shoots, Uploads, Reviews, Credentials, DeviceTokens, CollabNotifications
 from datetime import datetime, timedelta
 from datetime import date, time
 from fastapi import HTTPException
@@ -597,5 +597,20 @@ def RegisterToken(db: Session, influencer_id: str, device_token: str, device_typ
         device_type=device_type
     )
     db.add(token)
+    db.commit()
+    return True
+
+def CollabNotification(db: Session, influencer_id: str, brand_name: str, person_name: str, person_phone: str, person_email: str, budget: int, business_info: str, notes: str):
+    notification = CollabNotifications(
+        influencer_id=influencer_id,
+        brand_name=brand_name,
+        person_name=person_name,
+        person_phone=person_phone,
+        person_email=person_email,
+        budget=budget,
+        business_info=business_info,
+        notes=notes
+    )
+    db.add(notification)
     db.commit()
     return True

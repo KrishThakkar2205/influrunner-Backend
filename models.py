@@ -108,3 +108,19 @@ class DeviceTokens(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     deleted = Column(Boolean, default=False)
     deleted_at = Column(DateTime, nullable=True)
+
+class CollabNotifications(Base):
+    __tablename__ = "collab_notifications"
+
+    id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    influencer_id = Column(String, ForeignKey("influencers.id"), nullable=False)
+    brand_name = Column(String, nullable=False)
+    person_name = Column(String, nullable=False)
+    person_phone = Column(String, nullable=False)
+    person_email = Column(String, nullable=True)
+    budget = Column(Integer, nullable=True)
+    business_info = Column(String, nullable=True)
+    notes = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    deleted = Column(Boolean, default=False)
+    deleted_at = Column(DateTime, nullable=True)

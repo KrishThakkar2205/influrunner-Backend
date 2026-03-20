@@ -1,10 +1,10 @@
 from accessToken import CreateAccessToken, VerifyAccessToken, get_current_user
 from fastapi import FastAPI, Request, Response, Depends, UploadFile, File, Form
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from database import get_db
 from sqlalchemy.orm import Session
-from databaseAccess import RegisterToken, GetInstaMetricPerMedia, GetInstaMediaPortfolioMetric, GetInstaPortfolioMetric, EditProfile, GetPortfolio, SubmitReview, GetReviews, GetDashboard, AddSocialMedia, ValidateReviewToken, AddInfluencers, VerifyOTP, FinalSignup, Login, GetProfile, AddShoot, GetShoots, UpdateShoot, DeleteShoot,AddUpload, GetUploads, GetUpload,UpdateUploads, DeleteUpload, GenerateReview
+from databaseAccess import CollabNotification, RegisterToken, GetInstaMetricPerMedia, GetInstaMediaPortfolioMetric, GetInstaPortfolioMetric, EditProfile, GetPortfolio, SubmitReview, GetReviews, GetDashboard, AddSocialMedia, ValidateReviewToken, AddInfluencers, VerifyOTP, FinalSignup, Login, GetProfile, AddShoot, GetShoots, UpdateShoot, DeleteShoot,AddUpload, GetUploads, GetUpload,UpdateUploads, DeleteUpload, GenerateReview
 from schema.auth import ReviewResponse,SignupInitiate, VerifyOtp, SignupFinal, LoginSchema, ShootCreate, ShootUpdate, UploadCreate, UploadResponse, UploadUpdate, ReviewSubmit
 from maiService import send_otp_email
 from accessToken import CreateAccessToken, VerifyAccessToken
@@ -391,6 +391,22 @@ async def register_token(request: Request, db: Session = Depends(get_db), token:
     if RegisterToken(db, user_id, device_token, device_type):
         return Response(status_code=200, content="Token registered successfully")
     return Response(status_code=400, content="Token not registered")
+
+@app.post("/api/collab-notification")
+async def collab_notification(request: Request, db: Session = Depends(get_db)):
+    """Register device token"""
+    data = await request.json()
+    influencer_id = data.get("influencer_id")
+    brand_name = data.get("brandName")
+    person_name = data.get("contactPersonName")
+    person_phone = data.get("personPhoneNumber")
+    person_email = data.get("personEmail")
+    budget = data.get("budget")
+    business_info = data.get("businessInfo")
+    notes = data.get("notes")
+    if CollabNotification(db, influencer_id, brand_name, person_name, person_phone, person_email, budget, business_info, notes):
+        return JSONResponse(status_code=200, content={"message": "Collab notification sent successfully"})
+    return JSONResponse(status_code=400, content={"message": "Collab notification not sent"})
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000)

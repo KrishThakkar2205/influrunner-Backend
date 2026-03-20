@@ -614,3 +614,10 @@ def CollabNotification(db: Session, influencer_id: str, brand_name: str, person_
     db.add(notification)
     db.commit()
     return True
+
+def GetDashboardCollabNotification(db: Session, influencer_id: str):
+    notifications = db.query(CollabNotifications).filter(
+        CollabNotifications.influencer_id == influencer_id,
+        CollabNotifications.deleted == False
+    ).order_by(CollabNotifications.created_at.desc()).all()
+    return notifications

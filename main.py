@@ -4,7 +4,7 @@ from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from database import get_db
 from sqlalchemy.orm import Session
-from databaseAccess import CollabNotification, RegisterToken, GetInstaMetricPerMedia, GetInstaMediaPortfolioMetric, GetInstaPortfolioMetric, EditProfile, GetPortfolio, SubmitReview, GetReviews, GetDashboard, AddSocialMedia, ValidateReviewToken, AddInfluencers, VerifyOTP, FinalSignup, Login, GetProfile, AddShoot, GetShoots, UpdateShoot, DeleteShoot,AddUpload, GetUploads, GetUpload,UpdateUploads, DeleteUpload, GenerateReview
+from databaseAccess import GetDashboardCollabNotification, CollabNotification, RegisterToken, GetInstaMetricPerMedia, GetInstaMediaPortfolioMetric, GetInstaPortfolioMetric, EditProfile, GetPortfolio, SubmitReview, GetReviews, GetDashboard, AddSocialMedia, ValidateReviewToken, AddInfluencers, VerifyOTP, FinalSignup, Login, GetProfile, AddShoot, GetShoots, UpdateShoot, DeleteShoot,AddUpload, GetUploads, GetUpload,UpdateUploads, DeleteUpload, GenerateReview
 from schema.auth import ReviewResponse,SignupInitiate, VerifyOtp, SignupFinal, LoginSchema, ShootCreate, ShootUpdate, UploadCreate, UploadResponse, UploadUpdate, ReviewSubmit
 from maiService import send_otp_email
 from accessToken import CreateAccessToken, VerifyAccessToken
@@ -407,6 +407,14 @@ async def collab_notification(request: Request, db: Session = Depends(get_db)):
     if CollabNotification(db, influencer_id, brand_name, person_name, person_phone, person_email, budget, business_info, notes):
         return JSONResponse(status_code=200, content={"message": "Collab notification sent successfully"})
     return JSONResponse(status_code=400, content={"message": "Collab notification not sent"})
+
+@app.get("/api/dashboard-collab-notification")
+async def get_dashboard_collab_notification(db: Session = Depends(get_db), token: str = Depends(get_current_user)):
+    """Get Dashboard Collab notification"""
+    user_id = VerifyAccessToken(token)
+    if not user_id:
+        return Response(status_code=401, content="Invalid token")
+    return GetDashboardCollabNotification(db, user_id)
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000)

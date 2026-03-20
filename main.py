@@ -397,12 +397,12 @@ async def collab_notification(request: Request, db: Session = Depends(get_db)):
     """Register device token"""
     data = await request.json()
     influencer_id = data.get("influencer_id")
-    brand_name = data.get("brandName")
-    person_name = data.get("contactPersonName")
-    person_phone = data.get("personPhoneNumber")
-    person_email = data.get("personEmail")
+    brand_name = data.get("brand_name")
+    person_name = data.get("contact_person_name")
+    person_phone = data.get("person_phone_number")
+    person_email = data.get("person_email")
     budget = data.get("budget")
-    business_info = data.get("businessInfo")
+    business_info = data.get("business_info")
     notes = data.get("notes")
     if CollabNotification(db, influencer_id, brand_name, person_name, person_phone, person_email, budget, business_info, notes):
         return JSONResponse(status_code=200, content={"message": "Collab notification sent successfully"})

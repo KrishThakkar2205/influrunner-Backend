@@ -118,7 +118,7 @@ class CollabNotifications(Base):
     person_name = Column(String, nullable=False)
     person_phone = Column(String, nullable=False)
     person_email = Column(String, nullable=True)
-    budget = Column(Integer, nullable=True)
+    budget = Column(String, nullable=True)
     business_info = Column(String, nullable=True)
     notes = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)

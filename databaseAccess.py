@@ -621,3 +621,14 @@ def GetDashboardCollabNotification(db: Session, influencer_id: str):
         CollabNotifications.deleted == False
     ).order_by(CollabNotifications.created_at.desc()).all()
     return notifications
+
+
+def DeleteCollabNotification(db: Session, notification_id: str):
+    notification = db.query(CollabNotifications).filter(
+        CollabNotifications.id == notification_id
+    ).first()
+    if not notification:
+        raise HTTPException(status_code=404, detail="Notification not found")
+    notification.deleted = True
+    db.commit()
+    return True

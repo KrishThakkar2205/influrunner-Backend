@@ -282,10 +282,10 @@ async def instagram_redirect(code: str, state: str, db: Session = Depends(get_db
         
         AddSocialMedia(db, influencer_id, platform_user_id, access_token, access_token, expires_in, "instagram")
 
-        return RedirectResponse("https://influrunner.com/?auth_status=success")
+        return RedirectResponse("https://influrunner.com/influencer?auth_status=success")
     except Exception as e:
         print(e)
-        return RedirectResponse("https://influrunner.com/?auth_status=fail")
+        return RedirectResponse("https://influrunner.com/influencer?auth_status=fail")
 
 @app.get("/dashboard-card")
 async def dashboard(db: Session = Depends(get_db), token: str = Depends(get_current_user)):

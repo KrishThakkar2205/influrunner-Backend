@@ -280,7 +280,7 @@ async def instagram_redirect(code: str, state: str, db: Session = Depends(get_db
         }
         response =  requests.get(url, params=payload)
         data = response.json()
-        print(response.status_code)
+        print(response.status_code, response.text)
         access_token = data.get("access_token")
         expires_in_seconds = data.get("expires_in")
         print("Long Live Access Token: ", access_token)

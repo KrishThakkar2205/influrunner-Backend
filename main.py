@@ -243,7 +243,7 @@ async def connect_social_media(request: Request, platform: str, db: Session = De
     if platform not in ["instagram", "facebook", "youtube"]:
         raise HTTPException(status_code=400, detail="Invalid platform")
     if platform == "instagram":
-        url = f"https://www.instagram.com/oauth/authorize?force_reauth=true&client_id=1780741403310636&redirect_uri=https://api.influrunner.com/redirect/instagram&response_type=code&state={user_id}&scope=instagram_business_basic%2Cinstagram_business_manage_messages%2Cinstagram_business_manage_comments%2Cinstagram_business_content_publish%2Cinstagram_business_manage_insights"
+        url = f"https://www.instagram.com/oauth/authorize?force_reauth=true&client_id=1780741403310636&redirect_uri=https://api.influrunner.com/redirect/instagram&response_type=code&state={user_id}&scope=instagram_business_basic%2Cinstagram_business_manage_insights"
         return {"url": url}
 
 @app.get("/redirect/instagram")

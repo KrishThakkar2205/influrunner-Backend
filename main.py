@@ -254,90 +254,47 @@ async def instagram_redirect(code: str, state: str, db: Session = Depends(get_db
         print("Code: ", code)
         print("State: ", state)
         influencer_id = state
+        # Exchanging the Auth Code for the short lived access token
+        url = "https://api.instagram.com/oauth/access_token"
 
-        # ── Step 1: Exchange Auth Code → Short-Lived Token ──────────────────
-        step1_url = "https://api.instagram.com/oauth/access_token"
-        step1_payload = {
+        payload = {
             "client_id": "1780741403310636",
             "client_secret": "fa13fbc50f5ffc6d3fbc3cdce088b045",
             "grant_type": "authorization_code",
             "redirect_uri": "https://api.influrunner.com/redirect/instagram",
             "code": code
         }
-        step1_response = requests.post(step1_url, data=step1_payload)
-        step1_data = step1_response.json()
-        print("[Step 1] Status:", step1_response.status_code)
-        print("[Step 1] Response:", step1_response.text)
 
-        temp_access_token = step1_data.get("access_token")
-        platform_user_id = step1_data.get("user_id")
-        print("[Step 1] Temp Access Token:", temp_access_token)
-        print("[Step 1] Platform User ID:", platform_user_id)
+        response = requests.post(url, data=payload)
+        data = response.json()
+        temp_access_token = data.get("access_token")
+        platform_user_id = data.get("user_id")
+        permission = data.get("permissions")
+        print("Temp Access Token: ", temp_access_token)
+        print("Platform User ID: ", platform_user_id)
+        print("Permissions: ", permission)
 
-        if not temp_access_token:
-            print("[Step 1] ERROR: Failed to get short-lived token. Full response:", step1_data)
-            return RedirectResponse("https://influrunner.com/influencer?auth_status=fail")
-
-        # ── Step 1.5: Debug Token — check actual expiry from Meta debugger ──────
-        # Uses Facebook App ID|Secret as the app access token for introspection
-        INSTAGRAM_APP_SECRET = "fa13fbc50f5ffc6d3fbc3cdce088b045"
-
-        # ── Step 2: Verify token via API call (using Authorization header) ─────
-        # The new Instagram Business Login API (graph.instagram.com) requires the
-        # access token in the "Authorization: Bearer" header, NOT as ?access_token=
-        # query param. The old style causes "Unsupported request - method type: get".
-        auth_headers = {"Authorization": f"Bearer {temp_access_token}"}
-
-        verify_response = requests.get(
-            f"https://graph.instagram.com/{platform_user_id}",
-            headers=auth_headers,
-            params={"fields": "id,username"},
-        )
-        print("[Step 2 Verify] Status:", verify_response.status_code)
-        print("[Step 2 Verify] Response:", verify_response.text)
-
-        if verify_response.status_code != 200:
-            print("[Step 2 Verify] ERROR: Token verification failed:", verify_response.text)
-            return RedirectResponse("https://influrunner.com/influencer?auth_status=fail")
-
-        verify_data = verify_response.json()
-        print("[Step 2 Verify] Username:", verify_data.get("username"))
-        print("[Step 2 Verify] Token is valid and working ✓")
-
-        # ── Step 3: Try long-lived token exchange (using Authorization header) ──
-        # Now that we know Bearer auth works, retry the exchange the correct way.
-        exchange_response = requests.get(
-            "https://graph.instagram.com/access_token",
-            headers=auth_headers,
-            params={
-                "grant_type": "ig_exchange_token",
-                "client_secret": INSTAGRAM_APP_SECRET,
-            },
-        )
-        print("[Step 3 Exchange] Status:", exchange_response.status_code)
-        print("[Step 3 Exchange] Response:", exchange_response.text)
-        exchange_data = exchange_response.json()
-
-        long_lived_token = exchange_data.get("access_token")
-        expires_in_seconds = exchange_data.get("expires_in")
-
-        if long_lived_token and expires_in_seconds:
-            print(f"[Step 3 Exchange] ✓ Got long-lived token. Expires in {expires_in_seconds}s ({expires_in_seconds//86400} days).")
-            access_token = long_lived_token
-            expires_in = datetime.utcnow() + timedelta(seconds=int(expires_in_seconds))
-        else:
-            # Fallback: store short-lived token directly (60-day assumption for new Business Login API)
-            print("[Step 3 Exchange] Exchange not supported — storing token directly with 60-day expiry.")
-            access_token = temp_access_token
-            expires_in = datetime.utcnow() + timedelta(days=60)
-
-        print("[Final] Storing access token, expires:", expires_in)
-
+        # Exchanging the short lived access token for the long live access token
+        url = "https://graph.instagram.com/access_token"
+        payload = {
+            "client_secret": "fa13fbc50f5ffc6d3fbc3cdce088b045",
+            "grant_type": "ig_exchange_token",
+            "access_token" : temp_access_token,
+        }
+        response =  requests.get(url, params=payload)
+        data = response.json()
+        print(response.status_code, response.text)
+        access_token = data.get("access_token")
+        expires_in_seconds = data.get("expires_in")
+        print("Long Live Access Token: ", access_token)
+        print("Expires In Seconds: ", expires_in_seconds)
+        expires_in = datetime.utcnow() + timedelta(seconds=expires_in_seconds)
+        
         AddSocialMedia(db, influencer_id, platform_user_id, access_token, access_token, expires_in, "instagram")
 
         return RedirectResponse("https://influrunner.com/influencer?auth_status=success")
     except Exception as e:
-        print("[Instagram OAuth] Exception:", e)
+        print(e)
         return RedirectResponse("https://influrunner.com/influencer?auth_status=fail")
 
 @app.get("/dashboard-card")

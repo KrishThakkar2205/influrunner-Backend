@@ -278,17 +278,44 @@ async def instagram_redirect(code: str, state: str, db: Session = Depends(get_db
             print("[Step 1] ERROR: Failed to get short-lived token. Full response:", step1_data)
             return RedirectResponse("https://influrunner.com/influencer?auth_status=fail")
 
-        # ── Step 2: Exchange Short-Lived Token → Long-Lived Token ────────────
-        # NOTE: Despite official docs saying GET, the new Instagram Business
-        # Login API (instagram_business_basic) requires POST to this endpoint.
+        # ── Step 1.5: Debug Token — check actual expiry from Meta debugger ──────
+        # Uses Facebook App ID|Secret as the app access token for introspection
+        INSTAGRAM_APP_ID = "1780741403310636"
+        INSTAGRAM_APP_SECRET = "fa13fbc50f5ffc6d3fbc3cdce088b045"
+        FACEBOOK_APP_ID = "951851903948453"  # Top-level Meta App ID from dashboard
+
+        debug_response = requests.get(
+            "https://graph.facebook.com/debug_token",
+            params={
+                "input_token": temp_access_token,
+                "access_token": f"{INSTAGRAM_APP_ID}|{INSTAGRAM_APP_SECRET}",
+            }
+        )
+        print("[Token Debug] Status:", debug_response.status_code)
+        print("[Token Debug] Response:", debug_response.text)
+        debug_data = debug_response.json().get("data", {})
+        token_app_id = debug_data.get("app_id")
+        token_type = debug_data.get("type")
+        token_expires_at = debug_data.get("expires_at")   # Unix timestamp
+        token_is_valid = debug_data.get("is_valid")
+        print("[Token Debug] App ID in token:", token_app_id)
+        print("[Token Debug] Type:", token_type)
+        print("[Token Debug] Scopes:", debug_data.get("scopes"))
+        print("[Token Debug] Expires At (unix):", token_expires_at)
+        print("[Token Debug] Is Valid:", token_is_valid)
+
+        # ── Step 2: Try to exchange for Long-Lived Token ──────────────────────
+        # NOTE: New instagram_business_basic tokens (IGAAZ prefix) may already
+        # be long-lived (60 days). If the exchange fails, we fall back to storing
+        # the original token using the actual expiry from the debugger above.
         step2_url = "https://graph.instagram.com/access_token"
-        step2_payload = {
+        step2_params = {
             "grant_type": "ig_exchange_token",
-            "client_secret": "fa13fbc50f5ffc6d3fbc3cdce088b045",
+            "client_secret": INSTAGRAM_APP_SECRET,
             "access_token": temp_access_token,
         }
-        print("[Step 2] POST", step2_url)
-        step2_response = requests.post(step2_url, data=step2_payload)
+        print("[Step 2] GET", step2_url)
+        step2_response = requests.get(step2_url, params=step2_params)
         step2_data = step2_response.json()
         print("[Step 2] Status:", step2_response.status_code)
         print("[Step 2] Response:", step2_response.text)
@@ -298,9 +325,19 @@ async def instagram_redirect(code: str, state: str, db: Session = Depends(get_db
         print("[Step 2] Long-Lived Access Token:", access_token)
         print("[Step 2] Expires In Seconds:", expires_in_seconds)
 
+        # ── Step 2 Fallback: use original token if exchange not supported ─────
         if not access_token or expires_in_seconds is None:
-            print("[Step 2] ERROR: Failed to get long-lived token. Full response:", step2_data)
-            return RedirectResponse("https://influrunner.com/influencer?auth_status=fail")
+            print("[Step 2] Exchange failed. Checking if original token is already long-lived...")
+            if token_is_valid and token_expires_at:
+                # Token is valid — use it directly with its actual expiry
+                import time as _time
+                remaining_seconds = int(token_expires_at) - int(_time.time())
+                print(f"[Step 2 Fallback] Token valid. Expires in {remaining_seconds}s (~{remaining_seconds//86400} days). Using directly.")
+                access_token = temp_access_token
+                expires_in_seconds = remaining_seconds
+            else:
+                print("[Step 2] ERROR: Token invalid and exchange failed. Full response:", step2_data)
+                return RedirectResponse("https://influrunner.com/influencer?auth_status=fail")
 
         expires_in = datetime.utcnow() + timedelta(seconds=int(expires_in_seconds))
 

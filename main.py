@@ -254,45 +254,58 @@ async def instagram_redirect(code: str, state: str, db: Session = Depends(get_db
         print("Code: ", code)
         print("State: ", state)
         influencer_id = state
-        # Exchanging the Auth Code for the short lived access token
-        url = "https://api.instagram.com/oauth/access_token"
 
-        payload = {
+        # ── Step 1: Exchange Auth Code → Short-Lived Token ──────────────────
+        step1_url = "https://api.instagram.com/oauth/access_token"
+        step1_payload = {
             "client_id": "1780741403310636",
             "client_secret": "fa13fbc50f5ffc6d3fbc3cdce088b045",
             "grant_type": "authorization_code",
             "redirect_uri": "https://api.influrunner.com/redirect/instagram",
             "code": code
         }
+        step1_response = requests.post(step1_url, data=step1_payload)
+        step1_data = step1_response.json()
+        print("[Step 1] Status:", step1_response.status_code)
+        print("[Step 1] Response:", step1_response.text)
 
-        response = requests.post(url, data=payload)
-        data = response.json()
-        temp_access_token = data.get("access_token")
-        platform_user_id = data.get("user_id")
-        print("Temp Access Token: ", temp_access_token)
-        print("Platform User ID: ", platform_user_id)
+        temp_access_token = step1_data.get("access_token")
+        platform_user_id = step1_data.get("user_id")
+        print("[Step 1] Temp Access Token:", temp_access_token)
+        print("[Step 1] Platform User ID:", platform_user_id)
 
-        # Exchanging the short lived access token for the long live access token
-        url = "https://graph.instagram.com/access_token"
-        payload = {
+        if not temp_access_token:
+            print("[Step 1] ERROR: Failed to get short-lived token. Full response:", step1_data)
+            return RedirectResponse("https://influrunner.com/influencer?auth_status=fail")
+
+        # ── Step 2: Exchange Short-Lived Token → Long-Lived Token ────────────
+        step2_url = "https://graph.instagram.com/access_token"
+        step2_params = {
             "grant_type": "ig_exchange_token",
             "client_secret": "fa13fbc50f5ffc6d3fbc3cdce088b045",
-            "access_token" : temp_access_token,
+            "access_token": temp_access_token,
         }
-        response =  requests.get(url, params=payload)
-        data = response.json()
-        print(response.status_code, response.text)
-        access_token = data.get("access_token")
-        expires_in_seconds = data.get("expires_in")
-        print("Long Live Access Token: ", access_token)
-        print("Expires In Seconds: ", expires_in_seconds)
-        expires_in = datetime.utcnow() + timedelta(seconds=expires_in_seconds)
-        
+        step2_response = requests.get(step2_url, params=step2_params)
+        step2_data = step2_response.json()
+        print("[Step 2] Status:", step2_response.status_code)
+        print("[Step 2] Response:", step2_response.text)
+
+        access_token = step2_data.get("access_token")
+        expires_in_seconds = step2_data.get("expires_in")
+        print("[Step 2] Long-Lived Access Token:", access_token)
+        print("[Step 2] Expires In Seconds:", expires_in_seconds)
+
+        if not access_token or expires_in_seconds is None:
+            print("[Step 2] ERROR: Failed to get long-lived token. Full response:", step2_data)
+            return RedirectResponse("https://influrunner.com/influencer?auth_status=fail")
+
+        expires_in = datetime.utcnow() + timedelta(seconds=int(expires_in_seconds))
+
         AddSocialMedia(db, influencer_id, platform_user_id, access_token, access_token, expires_in, "instagram")
 
         return RedirectResponse("https://influrunner.com/influencer?auth_status=success")
     except Exception as e:
-        print(e)
+        print("[Instagram OAuth] Exception:", e)
         return RedirectResponse("https://influrunner.com/influencer?auth_status=fail")
 
 @app.get("/dashboard-card")

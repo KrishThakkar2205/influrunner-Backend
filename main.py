@@ -272,7 +272,7 @@ async def instagram_redirect(code: str, state: str, db: Session = Depends(get_db
         print("Platform User ID: ", platform_user_id)
 
         # Exchanging the short lived access token for the long live access token
-        url = "https://graph.instagram.com/access_token"
+        url = "https://graph.facebook.com/oauth/access_token"
         payload = {
             "client_secret": "fa13fbc50f5ffc6d3fbc3cdce088b045",
             "grant_type": "ig_exchange_token",

@@ -279,16 +279,36 @@ async def instagram_redirect(code: str, state: str, db: Session = Depends(get_db
             return RedirectResponse("https://influrunner.com/influencer?auth_status=fail")
 
         # ── Step 2: Exchange Short-Lived Token → Long-Lived Token ────────────
+        # Try graph.instagram.com first (new Instagram Business Login API)
         step2_url = "https://graph.instagram.com/access_token"
         step2_params = {
             "grant_type": "ig_exchange_token",
             "client_secret": "fa13fbc50f5ffc6d3fbc3cdce088b045",
             "access_token": temp_access_token,
         }
+        print("[Step 2] Requesting URL:", step2_url)
+        print("[Step 2] Params (no secret):", {k: v for k, v in step2_params.items() if k != 'client_secret'})
         step2_response = requests.get(step2_url, params=step2_params)
         step2_data = step2_response.json()
         print("[Step 2] Status:", step2_response.status_code)
         print("[Step 2] Response:", step2_response.text)
+
+        # If graph.instagram.com fails, try graph.facebook.com as fallback
+        if step2_response.status_code != 200:
+            print("[Step 2] graph.instagram.com failed, trying graph.facebook.com fallback...")
+            step2_fb_url = "https://graph.facebook.com/oauth/access_token"
+            step2_fb_params = {
+                "grant_type": "ig_exchange_token",
+                "client_id": "1780741403310636",
+                "client_secret": "fa13fbc50f5ffc6d3fbc3cdce088b045",
+                "access_token": temp_access_token,
+            }
+            step2_fb_response = requests.get(step2_fb_url, params=step2_fb_params)
+            print("[Step 2 FB Fallback] Status:", step2_fb_response.status_code)
+            print("[Step 2 FB Fallback] Response:", step2_fb_response.text)
+            # Use the successful one
+            if step2_fb_response.status_code == 200:
+                step2_data = step2_fb_response.json()
 
         access_token = step2_data.get("access_token")
         expires_in_seconds = step2_data.get("expires_in")

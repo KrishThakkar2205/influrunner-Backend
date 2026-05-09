@@ -280,20 +280,18 @@ async def instagram_redirect(code: str, state: str, db: Session = Depends(get_db
 
         # ── Step 1.5: Debug Token — check actual expiry from Meta debugger ──────
         # Uses Facebook App ID|Secret as the app access token for introspection
-        INSTAGRAM_APP_ID = "1780741403310636"
         INSTAGRAM_APP_SECRET = "fa13fbc50f5ffc6d3fbc3cdce088b045"
 
-        # ── Step 2: Verify token is usable via a direct API call ─────────────
-        # The new Instagram Business Login API (instagram_business_basic) issues
-        # IGAAZ tokens that are ALREADY long-lived (60 days). The ig_exchange_token
-        # exchange endpoint only works for the old deprecated Basic Display API.
-        # We verify the token works, then store it directly with 60-day expiry.
+        # ── Step 2: Verify token via API call (using Authorization header) ─────
+        # The new Instagram Business Login API (graph.instagram.com) requires the
+        # access token in the "Authorization: Bearer" header, NOT as ?access_token=
+        # query param. The old style causes "Unsupported request - method type: get".
+        auth_headers = {"Authorization": f"Bearer {temp_access_token}"}
+
         verify_response = requests.get(
             f"https://graph.instagram.com/{platform_user_id}",
-            params={
-                "fields": "id,username",
-                "access_token": temp_access_token,
-            }
+            headers=auth_headers,
+            params={"fields": "id,username"},
         )
         print("[Step 2 Verify] Status:", verify_response.status_code)
         print("[Step 2 Verify] Response:", verify_response.text)
@@ -306,10 +304,34 @@ async def instagram_redirect(code: str, state: str, db: Session = Depends(get_db
         print("[Step 2 Verify] Username:", verify_data.get("username"))
         print("[Step 2 Verify] Token is valid and working ✓")
 
-        # New Business Login tokens are 60-day long-lived — store directly
-        access_token = temp_access_token
-        expires_in = datetime.utcnow() + timedelta(days=60)
-        print("[Step 2] Storing token with 60-day expiry:", expires_in)
+        # ── Step 3: Try long-lived token exchange (using Authorization header) ──
+        # Now that we know Bearer auth works, retry the exchange the correct way.
+        exchange_response = requests.get(
+            "https://graph.instagram.com/access_token",
+            headers=auth_headers,
+            params={
+                "grant_type": "ig_exchange_token",
+                "client_secret": INSTAGRAM_APP_SECRET,
+            },
+        )
+        print("[Step 3 Exchange] Status:", exchange_response.status_code)
+        print("[Step 3 Exchange] Response:", exchange_response.text)
+        exchange_data = exchange_response.json()
+
+        long_lived_token = exchange_data.get("access_token")
+        expires_in_seconds = exchange_data.get("expires_in")
+
+        if long_lived_token and expires_in_seconds:
+            print(f"[Step 3 Exchange] ✓ Got long-lived token. Expires in {expires_in_seconds}s ({expires_in_seconds//86400} days).")
+            access_token = long_lived_token
+            expires_in = datetime.utcnow() + timedelta(seconds=int(expires_in_seconds))
+        else:
+            # Fallback: store short-lived token directly (60-day assumption for new Business Login API)
+            print("[Step 3 Exchange] Exchange not supported — storing token directly with 60-day expiry.")
+            access_token = temp_access_token
+            expires_in = datetime.utcnow() + timedelta(days=60)
+
+        print("[Final] Storing access token, expires:", expires_in)
 
         AddSocialMedia(db, influencer_id, platform_user_id, access_token, access_token, expires_in, "instagram")
 

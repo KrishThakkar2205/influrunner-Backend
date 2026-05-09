@@ -1,3 +1,4 @@
+from asyncio import sleep
 from accessToken import CreateAccessToken, VerifyAccessToken, get_current_user
 from fastapi import FastAPI, Request, Response, Depends, UploadFile, File, Form
 from fastapi.responses import RedirectResponse, JSONResponse
@@ -270,7 +271,7 @@ async def instagram_redirect(code: str, state: str, db: Session = Depends(get_db
         platform_user_id = data.get("user_id")
         print("Temp Access Token: ", temp_access_token)
         print("Platform User ID: ", platform_user_id)
-
+        await sleep(2)
         # Exchanging the short lived access token for the long live access token
         url = "https://graph.instagram.com/access_token"
         payload = {

@@ -280,7 +280,7 @@ async def instagram_redirect(code: str, state: str, db: Session = Depends(get_db
             "redirect_uri": "https://api.influrunner.com/redirect/instagram",
             "access_token" : temp_access_token,
         }
-        response =  requests.post(url, params=payload)
+        response =  requests.post(url, data=payload)
         data = response.json()
         print(response.status_code, response.text)
         access_token = data.get("access_token")

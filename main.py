@@ -273,8 +273,14 @@ async def instagram_redirect(code: str, state: str, db: Session = Depends(get_db
         print("Platform User ID: ", platform_user_id)
 
         # Exchanging the short lived access token for the long live access token
-        url = f"https://graph.instagram.com/access_token?client_id=1780741403310636&client_secret=fa13fbc50f5ffc6d3fbc3cdce088b045&grant_type=ig_exchange_token&redirect_uri=https://api.influrunner.com/redirect/instagram&access_token={temp_access_token}"
-        response =  requests.get(url)
+        url = "https://graph.instagram.com/access_token"
+        payload = {
+            "client_secret": "fa13fbc50f5ffc6d3fbc3cdce088b045",
+            "grant_type": "ig_exchange_token",
+            "redirect_uri": "https://api.influrunner.com/redirect/instagram",
+            "access_token" : temp_access_token,
+        }
+        response =  requests.post(url, params=payload)
         data = response.json()
         print(response.status_code, response.text)
         access_token = data.get("access_token")

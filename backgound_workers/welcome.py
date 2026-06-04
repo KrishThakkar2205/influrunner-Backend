@@ -23,6 +23,7 @@ def connect_instagram():
         result = (
             db.query(Influencer.id, Influencer.phone_number, Influencer.name)
             .outerjoin(Credentials, Influencer.id == Credentials.influencer_id)
+            .filter(Influencer.whatsapp_notification == True)
             .filter(Credentials.influencer_id == None)
             .all()
         )

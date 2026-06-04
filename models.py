@@ -24,6 +24,7 @@ class Influencer(Base):
     deleted = Column(Boolean, default=False)
     deleted_at = Column(DateTime, nullable=True)
     bio = Column(String, nullable=True)
+    whatsapp_notification = Column(Boolean, default=True)
 
 class Uploads(Base):
     __tablename__ = "uploads"

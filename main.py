@@ -329,6 +329,7 @@ async def update_profile(
     max_price: Optional[float] = Form(None),
     categories: Optional[List[str]] = Form(None),  # JSON string
     profile_picture: Optional[UploadFile] = File(None),
+    whatsapp_notification: Optional[bool] = Form(None),
     db: Session = Depends(get_db),
     token: str = Depends(get_current_user)
 ):
@@ -351,6 +352,8 @@ async def update_profile(
         profile_data["max_price"] = max_price
     if categories:
         profile_data["categories"] = categories
+    if whatsapp_notification is not None:
+        profile_data["whatsapp_notification"] = whatsapp_notification
     if profile_picture:
         os.makedirs(UPLOAD_DIR, exist_ok=True)
         file_extension = profile_picture.filename.split(".")[-1]

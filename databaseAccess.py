@@ -90,7 +90,8 @@ def GetProfile(db: Session, user_id: int):
             "profile_picture_location": user.profile_picture_location,
             "created_at": user.created_at,
             "instagram": True,
-            "bio":user.bio
+            "bio":user.bio,
+            "whatsapp_notification":user.whatsapp_notification
         }
     else:
         user_dict = {
@@ -105,7 +106,8 @@ def GetProfile(db: Session, user_id: int):
             "profile_picture_location": user.profile_picture_location,
             "created_at": user.created_at,
             "instagram": False,
-            "bio":user.bio
+            "bio":user.bio,
+            "whatsapp_notification":user.whatsapp_notification
         }
     
     return user_dict
@@ -501,7 +503,7 @@ async def EditProfile(db: Session, user_id: str, profile_data: dict):
     user = db.query(Influencer).filter(Influencer.id == user_id).first()
     
     # Update allowed fields
-    allowed_fields = ['name', 'bio', 'location', 'min_price', 'max_price', 'profile_picture_location']
+    allowed_fields = ['name', 'bio', 'location', 'min_price', 'max_price', 'profile_picture_location', 'whatsapp_notification']
     for field in allowed_fields:
         if field in profile_data:
             setattr(user, field, profile_data[field])

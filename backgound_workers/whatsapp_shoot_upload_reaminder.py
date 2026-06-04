@@ -3,10 +3,21 @@ from database import SessionLocal
 from firebase.notification import send_notification
 from models import Shoots, Uploads,Influencer, DeviceTokens
 from zoneinfo import ZoneInfo
+import os
+from dotenv import load_dotenv
 import requests
 
+load_dotenv()
 
-access_token_for_waba = "EAANhtEqdFqUBQZC2TnvE5xqZBglHEKehpxzZAabMCSFxkZA624fkq6ZBoiu333RjhbzGTfnEAJe73czUx72dqJL4Oy6UV4ok9WhtGCr3jemTNf55Hdkc2kJhlFJeGzQh9ZBoznGFTyFU2sxIeuglMxPwLlW5DzyaVb1IEv25L8bouctVr8eOyuNZBObyf2jJNgGrxxmrG2ZAXg7Ojqdvzd6ZCuzd4SlERtucnHSfpfGiRMz9paDCl6sxXFDIcii0cBZB1uCPF6dBsveIBxKIlcAD6i"
+ACCESS_TOKEN = os.getenv("WABA_TOKEN")
+PHONE_NUMBER_ID = os.getenv("WABA_PHONE_NUMBER_ID")
+
+url = f"https://graph.facebook.com/v25.0/{PHONE_NUMBER_ID}/messages"
+
+headers = {
+    "Authorization": f"Bearer {ACCESS_TOKEN}",
+    "Content-Type": "application/json"
+}
 
 def send_shoot_reminder_bfr_2hr():
     db = SessionLocal()
@@ -33,23 +44,77 @@ def send_shoot_reminder_bfr_2hr():
 
             if timedelta(hours=1, minutes=55) <= diff <= timedelta(hours=2):
                 print(f"[2HR] ✅ Shoot {shoot.id} is within 2hr window, sending notification...")
-                device_tokens = db.query(DeviceTokens.device_token).filter(
-                    DeviceTokens.influencer_id == shoot.influencer_id
-                ).all()
-                print(f"[2HR] Device tokens found: {len(device_tokens)}")  # ✅ check if tokens exist
+                # device_tokens = db.query(DeviceTokens.device_token).filter(
+                #     DeviceTokens.influencer_id == shoot.influencer_id
+                # ).all()
+                infleuncer_details = db.query(Influencer.name, Influencer.phone_number).filter(
+                    Influencer.id == shoot.influencer_id
+                ).first()
+                
+                try:
+                    payload_for_shoot_remainder = {
+                        "messaging_product": "whatsapp",
+                        "to": infleuncer_details.phone_number,
+                        "type": "template",
+                        "template": {
+                            "name": "shoot_remainder",
+                            "language": {
+                                "code": "en"
+                            },
+                            "components": [
+                                {
+                                    "type" : "header",
+                                    "parameters": [
+                                        {
+                                            "type": "text",
+                                            "parameter_name": "hour",
+                                            "text": "2 Hours"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "body",
+                                    "parameters": [
+                                        {
+                                            "type": "text",
+                                            "parameter_name": "name",
+                                            "text": infleuncer_details.name
+                                        },{
+                                            "type": "text",
+                                            "parameter_name": "brand_name",
+                                            "text": shoot.brand_name
+                                        },{
+                                            "type": "text",
+                                            "parameter_name": "shoot_date",
+                                            "text": shoot_date_time.strftime("%d %B %Y")
+                                        },{
+                                            "type": "text",
+                                            "parameter_name": "shoot_time",
+                                            "text": formatted_time
+                                        },{
+                                            "type": "text",
+                                            "parameter_name": "notes",
+                                            "text": shoot.notes
+                                        },{
+                                            "type":"text",
+                                            "parameter_name":"location",
+                                            "text":shoot.location
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
 
-                for token in device_tokens:
-                    try:
-                        status = send_notification(
-                            token.device_token,
-                            "Shoot Reminder Before 2 Hours",
-                            f"Brand Name : {shoot.brand_name}\nShoot Time : {formatted_time}\nLocation : {shoot.location}\n\nNotes : {shoot.notes}\n\nBe On time"
-                        )
-                        print(f"[2HR] Notification status for token {token.device_token}: {status}")  # ✅ check response
-                        if status != 200:
-                            print(f"[2HR] ❌ Failed for shoot {shoot.id}")
-                    except Exception as e:
-                        print(f"[2HR] ❌ Exception: {e}")
+                    response = requests.post(
+                    url,
+                    headers=headers,
+                    json=payload_for_shoot_remainder
+                    )
+                
+                    print(response.json())
+                except Exception as e:
+                    print(f"[2HR] ❌ Exception: {e}")
 
                 shoot.notify_before_2hr = True
                 db.commit()

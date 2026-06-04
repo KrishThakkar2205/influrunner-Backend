@@ -51,6 +51,10 @@ def send_shoot_reminder_bfr_2hr():
                     Influencer.id == shoot.influencer_id
                 ).first()
                 
+                if not infleuncer_details:
+                    print(f"[2HR] ❌ Influencer not found for shoot ID {shoot.id} with influencer_id {shoot.influencer_id}")
+                    continue
+                
                 try:
                     payload_for_shoot_remainder = {
                         "messaging_product": "whatsapp",

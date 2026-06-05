@@ -115,5 +115,5 @@ def add_to_calender_remainder():
                 print("Response:", response.text)
         except Exception as e:
             print(e)
-    finally:
-        db.close()
+        finally:
+            db.close()

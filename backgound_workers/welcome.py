@@ -70,3 +70,50 @@ def connect_instagram():
         print(e)
     finally:
         db.close()
+
+
+def add_to_calender_remainder():
+    db = SessionLocal()
+    result = db.query(Influencer.id, Influencer.phone_number, Influencer.name).filter(Influencer.whatsapp_notification == True).all()
+    for influencer_id, phone_number, name in result:
+        try:
+            payload_for_add_to_calender = {
+                "messaging_product":"whatsapp",
+                "recipient_type": "individual",
+                "to": phone_number,
+                "type": "template",
+                "template": {
+                    "name": "add_to_calender_remainder",
+                    "language": {
+                        "code": "en"
+                    },
+                    "components":[
+                        {
+                            "type":"header",
+                            "parameters":[
+                                {
+                                    "type": "text",
+                                    "parameter_name": "name",
+                                    "text": name
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+
+            response = requests.post(
+                url,
+                headers=headers,
+                json=payload_for_add_to_calender
+            )
+
+            if response.status_code == 200:
+                print(f"Successfully sent template message to {phone_number}")
+            else:
+                print(f"Failed to send template message to {phone_number}")
+                print("Response:", response.text)
+        except Exception as e:
+            print(e)
+    finally:
+        db.close()

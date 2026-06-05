@@ -20,7 +20,7 @@ import os
 import aiofiles
 from apscheduler.schedulers.background import BackgroundScheduler
 from backgound_workers.update_creds import update_creds
-from backgound_workers.welcome import connect_instagram
+from backgound_workers.welcome import connect_instagram, add_to_calender_remainder
 import firebase.firebase_config
 from backgound_workers.whatsapp_shoot_upload_reaminder import send_shoot_reminder_bfr_2hr, send_shoot_reminder_bfr_1hr
 
@@ -43,7 +43,7 @@ scheduler = BackgroundScheduler()
 def start_scheduler():
     scheduler.add_job(update_creds, 'cron', hour=0, minute = 0, id = "update_creds")
     scheduler.add_job(connect_instagram, 'cron', hour=10, minute = 00, id = "connect_instagram")
-    # scheduler.add_job(connect_instagram, "cron", hour = 15, minute = 00, id = "connect_instagram_2")
+    scheduler.add_job(add_to_calender_remainder, "cron", hour = 20, minute = 00, id = "add_to_calender_remainder")
     scheduler.add_job(send_shoot_reminder_bfr_2hr, 'interval', minutes=1, id = "send_shoot_reminder_bfr_2hr")
     scheduler.add_job(send_shoot_reminder_bfr_1hr, 'interval', minutes=1, id = "send_shoot_reminder_bfr_1hr")
     scheduler.start()

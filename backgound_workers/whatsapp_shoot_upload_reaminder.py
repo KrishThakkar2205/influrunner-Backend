@@ -220,3 +220,197 @@ def send_shoot_reminder_bfr_1hr():
         print(e)
     finally:
         db.close()
+
+
+def upload_remainder_before_2hr():
+    db = SessionLocal()
+    try:
+        
+        now = datetime.utcnow().replace(tzinfo=ZoneInfo("UTC"))
+        uploads = db.query(Uploads).filter(Uploads.upload_date == now.date(), Uploads.completed == False, Uploads.notify_before_2hr == False).all()
+        for upload in uploads:
+            upload_date_time = datetime.combine(upload.upload_date, upload.upload_time)
+            upload_date_time_utc = upload_date_time.replace(tzinfo=ZoneInfo("UTC"))
+            diff = upload_date_time_utc - now
+            ist_time = upload_date_time_utc.astimezone(ZoneInfo("Asia/Kolkata"))
+            formatted_time = ist_time.strftime("%I:%M %p")
+            if timedelta(hours=1,minutes=55) <= diff <= timedelta(hours=2):
+                infleuncer_details = db.query(Influencer.name, Influencer.phone_number).filter(
+                    Influencer.id == upload.influencer_id
+                ).first()
+                
+                if not infleuncer_details:
+                    print(f"[UPLOAD 2HR REM] ❌ Influencer not found for shoot ID {upload.id} with influencer_id {upload.influencer_id}")
+                    continue
+                
+                try:
+                    payload_for_shoot_remainder = {
+                        "messaging_product": "whatsapp",
+                        "to": infleuncer_details.phone_number,
+                        "type": "template",
+                        "template": {
+                            "name": "upload_remainder",
+                            "language": {
+                                "code": "en"
+                            },
+                            "components": [
+                                {
+                                    "type" : "header",
+                                    "parameters": [
+                                        {
+                                            "type": "text",
+                                            "parameter_name": "time",
+                                            "text": "2 Hours"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "body",
+                                    "parameters": [
+                                        {
+                                            "type": "text",
+                                            "parameter_name": "name",
+                                            "text": infleuncer_details.name
+                                        },{
+                                            "type": "text",
+                                            "parameter_name": "brand_name",
+                                            "text": upload.brand_name
+                                        },{
+                                            "type": "text",
+                                            "parameter_name": "content",
+                                            "text": upload.name
+                                        },{
+                                            "type": "text",
+                                            "parameter_name": "date",
+                                            "text": upload_date_time.strftime("%d %B %Y")
+                                        },{
+                                            "type": "text",
+                                            "parameter_name": "time",
+                                            "text": formatted_time
+                                        },{
+                                            "type": "text",
+                                            "parameter_name": "platform",
+                                            "text": upload.platform
+                                        },{
+                                            "type":"text",
+                                            "parameter_name":"notes",
+                                            "text":upload.notes
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+
+                    response = requests.post(
+                    url,
+                    headers=headers,
+                    json=payload_for_shoot_remainder
+                    )
+                
+                    print(response.json())
+                except Exception as e:
+                    print(e)
+                upload.notify_before_2hr = True
+                db.commit()
+    except Exception as e:
+        print(e)
+    finally:
+        db.close()
+
+
+def upload_remainder_before_1hr():
+    db = SessionLocal()
+    try:
+        
+        now = datetime.utcnow().replace(tzinfo=ZoneInfo("UTC"))
+        uploads = db.query(Uploads).filter(Uploads.upload_date == now.date(), Uploads.completed == False, Uploads.notify_before_1hr == False).all()
+        for upload in uploads:
+            upload_date_time = datetime.combine(upload.upload_date, upload.upload_time)
+            upload_date_time_utc = upload_date_time.replace(tzinfo=ZoneInfo("UTC"))
+            diff = upload_date_time_utc - now
+            ist_time = upload_date_time_utc.astimezone(ZoneInfo("Asia/Kolkata"))
+            formatted_time = ist_time.strftime("%I:%M %p")
+            if timedelta(minutes=55) <= diff <= timedelta(hours=1):
+                infleuncer_details = db.query(Influencer.name, Influencer.phone_number).filter(
+                    Influencer.id == upload.influencer_id
+                ).first()
+                
+                if not infleuncer_details:
+                    print(f"[UPLOAD 2HR REM] ❌ Influencer not found for shoot ID {upload.id} with influencer_id {upload.influencer_id}")
+                    continue
+                
+                try:
+                    payload_for_shoot_remainder = {
+                        "messaging_product": "whatsapp",
+                        "to": infleuncer_details.phone_number,
+                        "type": "template",
+                        "template": {
+                            "name": "upload_remainder",
+                            "language": {
+                                "code": "en"
+                            },
+                            "components": [
+                                {
+                                    "type" : "header",
+                                    "parameters": [
+                                        {
+                                            "type": "text",
+                                            "parameter_name": "time",
+                                            "text": "1 Hour"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "body",
+                                    "parameters": [
+                                        {
+                                            "type": "text",
+                                            "parameter_name": "name",
+                                            "text": infleuncer_details.name
+                                        },{
+                                            "type": "text",
+                                            "parameter_name": "brand_name",
+                                            "text": upload.brand_name
+                                        },{
+                                            "type": "text",
+                                            "parameter_name": "content",
+                                            "text": upload.name
+                                        },{
+                                            "type": "text",
+                                            "parameter_name": "date",
+                                            "text": upload_date_time.strftime("%d %B %Y")
+                                        },{
+                                            "type": "text",
+                                            "parameter_name": "time",
+                                            "text": formatted_time
+                                        },{
+                                            "type": "text",
+                                            "parameter_name": "platform",
+                                            "text": upload.platform
+                                        },{
+                                            "type":"text",
+                                            "parameter_name":"notes",
+                                            "text":upload.notes
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+
+                    response = requests.post(
+                    url,
+                    headers=headers,
+                    json=payload_for_shoot_remainder
+                    )
+                
+                    print(response.json())
+                except Exception as e:
+                    print(e)
+                upload.notify_before_1hr = True
+                db.commit()
+    except Exception as e:
+        print(e)
+    finally:
+        db.close()

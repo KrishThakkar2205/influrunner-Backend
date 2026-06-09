@@ -22,7 +22,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from backgound_workers.update_creds import update_creds
 from backgound_workers.welcome import connect_instagram, add_to_calender_remainder
 import firebase.firebase_config
-from backgound_workers.whatsapp_shoot_upload_reaminder import send_shoot_reminder_bfr_2hr, send_shoot_reminder_bfr_1hr
+from backgound_workers.whatsapp_shoot_upload_reaminder import send_shoot_reminder_bfr_2hr, send_shoot_reminder_bfr_1hr, upload_remainder_before_2hr, upload_remainder_before_1hr
 
 
 UPLOAD_DIR = "uploads/profile_pictures"
@@ -46,6 +46,8 @@ def start_scheduler():
     scheduler.add_job(add_to_calender_remainder, "cron", hour = 20, minute = 00, id = "add_to_calender_remainder")
     scheduler.add_job(send_shoot_reminder_bfr_2hr, 'interval', minutes=1, id = "send_shoot_reminder_bfr_2hr")
     scheduler.add_job(send_shoot_reminder_bfr_1hr, 'interval', minutes=1, id = "send_shoot_reminder_bfr_1hr")
+    scheduler.add_job(upload_remainder_before_2hr, 'interval', minutes=1, id = "upload_remainder_before_2hr")
+    scheduler.add_job(upload_remainder_before_1hr, 'interval', minutes=1, id = "upload_remainder_before_1hr")
     scheduler.start()
 
 @app.on_event("shutdown")

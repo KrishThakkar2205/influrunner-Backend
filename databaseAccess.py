@@ -586,7 +586,7 @@ def GetInstaPortfolioMetric(db: Session, infleuncer_id: str):
     # print(data)
     # print("Formatted")
     # print(formatted)
-    response_to_browser["city"] = formatted
+    response_to_browser["engaged_audience_demographics_city"] = formatted
     print(response_to_browser)
     return response_to_browser
 

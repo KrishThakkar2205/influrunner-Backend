@@ -582,6 +582,7 @@ def GetInstaPortfolioMetric(db: Session, infleuncer_id: str):
         }
         for item in top_cities
     ]
+    print(data)
     print("Formatted")
     print(formatted)
     response_to_browser["city"] = formatted

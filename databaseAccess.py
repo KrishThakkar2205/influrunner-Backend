@@ -585,7 +585,7 @@ def GetInstaPortfolioMetric(db: Session, infleuncer_id: str):
     print(data)
     # print("Formatted")
     # print(formatted)
-    response_to_browser["city"] = formatted
+    # response_to_browser["city"] = formatted
     return response_to_browser
 
 def GetInstaMetricPerMedia(db: Session, influencer_id: str, media_id: str):

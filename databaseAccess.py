@@ -560,32 +560,34 @@ def GetInstaPortfolioMetric(db: Session, infleuncer_id: str):
     for item in data['data']:
         response_to_browser[item['name']] = item['total_value']['value']
 
-    url = f"https://graph.instagram.com/v25.0/{id}/insights?metric=engaged_audience_demographics&period=lifetime&timeframe=this_month&metric_type=total_value&access_token={credentials.access_token}"
+    url = f"https://graph.instagram.com/v25.0/{id}/insights?metric=engaged_audience_demographics&period=lifetime&timeframe=this_month&breakdown=city&metric_type=total_value&access_token={credentials.access_token}"
     response = requests.get(url)
     data = response.json()
-    # results = (
-    #     data["data"][0]
-    #     ["total_value"]["breakdowns"][0]
-    #     ["results"]
-    # )
+    results = (
+        data["data"][0]
+        ["total_value"]["breakdowns"][0]
+        ["results"]
+    )
+    total = sum(item["value"] for item in results)
 
-    # top_cities = sorted(
-    #     results,
-    #     key=lambda x: x["value"],
-    #     reverse=True
-    # )[:5]
-
-    # formatted = [
-    #     {
-    #         "city": item["dimension_values"][0],
-    #         "engagement": item["value"]
-    #     }
-    #     for item in top_cities
-    # ]
-    print(data)
+    top_cities = sorted(
+        results,
+        key=lambda x: x["value"],
+        reverse=True
+    )[:5]
+    
+    formatted = [
+        {
+            "city": item["dimension_values"][0],
+            "percentage": round((item["value"] / total) * 100, 2)
+        }
+        for item in top_cities
+    ]
+    # print(data)
     # print("Formatted")
     # print(formatted)
-    # response_to_browser["city"] = formatted
+    response_to_browser["city"] = formatted
+    print(response_to_browser)
     return response_to_browser
 
 def GetInstaMetricPerMedia(db: Session, influencer_id: str, media_id: str):

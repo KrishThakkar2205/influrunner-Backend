@@ -606,9 +606,10 @@ def GetInstaMetricPerMedia(db: Session, influencer_id: str, media_id: str, media
         url = f"https://graph.instagram.com/v25.0/{media_id}/insights?metric=total_interactions,views,shares,reach,saved&period=lifetime&access_token={credentials.access_token}"
     response = requests.get(url)
     data = response.json()
-    print(data)
+    # print(data)
     for item in data['data']:
         response_to_browser[item['name']] = item['values'][0]['value']
+    print(response_to_browser)
     return response_to_browser
 
 def RegisterToken(db: Session, influencer_id: str, device_token: str, device_type: str):

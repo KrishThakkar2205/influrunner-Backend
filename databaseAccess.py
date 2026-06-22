@@ -601,7 +601,7 @@ def GetInstaMetricPerMedia(db: Session, influencer_id: str, media_id: str, media
         raise HTTPException(status_code=404, detail="Credentials not found")
     #Media ID of the Account
     if media_type == "REELS":
-        url = f"https://graph.instagram.com/v25.0/{media_id}/insights?metric=total_interactions,views,shares,reach,reels_skip_rate,ig_reels_avg_watch_time&period=lifetime&access_token={credentials.access_token}"
+        url = f"https://graph.instagram.com/v25.0/{media_id}/insights?metric=total_interactions,views,shares,reach,reels_skip_rate,ig_reels_avg_watch_time,saved&period=lifetime&access_token={credentials.access_token}"
     else:
         url = f"https://graph.instagram.com/v25.0/{media_id}/insights?metric=total_interactions,views,shares,reach,saved&period=lifetime&access_token={credentials.access_token}"
     response = requests.get(url)

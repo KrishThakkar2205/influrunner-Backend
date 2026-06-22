@@ -543,6 +543,7 @@ def GetInstaPortfolioMetric(db: Session, infleuncer_id: str):
     url = f"https://graph.instagram.com/v25.0/me?fields=username,media_count,followers_count&access_token={credentials.access_token}"
     response = requests.get(url)
     data = response.json()
+    print(data)
     response_to_browser["username"] = data["username"]
     response_to_browser["media_count"] = data["media_count"]
     response_to_browser["followers_count"] = data["followers_count"]
@@ -599,7 +600,7 @@ def GetInstaMetricPerMedia(db: Session, influencer_id: str, media_id: str):
     if not credentials:
         raise HTTPException(status_code=404, detail="Credentials not found")
     #Media ID of the Account
-    url = f"https://graph.instagram.com/v25.0/{media_id}/insights?metric=total_interactions,views,shares,reach&period=lifetime&access_token={credentials.access_token}"
+    url = f"https://graph.instagram.com/v25.0/{media_id}/insights?metric=total_interactions,views,shares,reach,total_views,total_likes&period=lifetime&access_token={credentials.access_token}"
     response = requests.get(url)
     data = response.json()
     print(data)

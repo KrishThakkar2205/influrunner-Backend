@@ -381,11 +381,11 @@ async def get_insta_portfolio_media_metric(influencer_id: str, db: Session = Dep
     return GetInstaMediaPortfolioMetric(db, influencer_id)
 
 @app.get("/api/insta-metric-per-media")
-async def get_insta_metric_per_media(influencer_id: str, media_id: str, db: Session = Depends(get_db)):
+async def get_insta_metric_per_media(influencer_id: str, media_id: str, media_type:str , db: Session = Depends(get_db)):
     """Get Instagram metric per media"""
-    if not influencer_id or not media_id:
-        return Response(status_code=400, content="Missing influencer_id or media_id")
-    return GetInstaMetricPerMedia(db, influencer_id,media_id)
+    if not influencer_id or not media_id or not media_type:
+        return Response(status_code=400, content="Missing influencer_id or media_id or media_type")
+    return GetInstaMetricPerMedia(db, influencer_id,media_id,media_type)
 
 @app.get("/api/dashboard-insta-metric")
 async def get_dashboard_insta_metric(db: Session = Depends(get_db), token: str = Depends(get_current_user)):

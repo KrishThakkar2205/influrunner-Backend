@@ -525,7 +525,7 @@ def GetInstaMediaPortfolioMetric(db:Session, influencer_id: str):
     if not credentials:
         raise HTTPException(status_code=404, detail="Credentials not found")
     #Media ID of the Account
-    url = f"https://graph.instagram.com/v25.0/me/media?fields=id,media_url,thumbnail_url,media_type,caption,permalink,timestamp&limit=15&access_token={credentials.access_token}"
+    url = f"https://graph.instagram.com/v25.0/me/media?fields=id,media_url,thumbnail_url,media_type,caption,permalink,timestamp&limit=20&access_token={credentials.access_token}"
     response = requests.get(url)
     data = response.json()
     response_to_browser = data["data"]
@@ -591,7 +591,7 @@ def GetInstaPortfolioMetric(db: Session, infleuncer_id: str):
     print(response_to_browser)
     return response_to_browser
 
-def GetInstaMetricPerMedia(db: Session, influencer_id: str, media_id: str):
+def GetInstaMetricPerMedia(db: Session, influencer_id: str, media_id: str, media_type: str):
     response_to_browser = {}
     credentials = db.query(Credentials.access_token, Credentials.refresh_token).filter(
         Credentials.influencer_id == influencer_id,
@@ -600,7 +600,10 @@ def GetInstaMetricPerMedia(db: Session, influencer_id: str, media_id: str):
     if not credentials:
         raise HTTPException(status_code=404, detail="Credentials not found")
     #Media ID of the Account
-    url = f"https://graph.instagram.com/v25.0/{media_id}/insights?metric=total_interactions,views,shares,reach,reels_skip_rate,ig_reels_avg_watch_time&period=lifetime&access_token={credentials.access_token}"
+    if media_type == "REELS":
+        url = f"https://graph.instagram.com/v25.0/{media_id}/insights?metric=total_interactions,views,shares,reach,reels_skip_rate,ig_reels_avg_watch_time,reposts&period=lifetime&access_token={credentials.access_token}"
+    else:
+        url = f"https://graph.instagram.com/v25.0/{media_id}/insights?metric=total_interactions,views,shares,reach,reposts,saved&period=lifetime&access_token={credentials.access_token}"
     response = requests.get(url)
     data = response.json()
     print(data)

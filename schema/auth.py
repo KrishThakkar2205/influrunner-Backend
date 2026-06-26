@@ -84,10 +84,8 @@ class ReviewSubmit(BaseModel):
 class ReviewResponse(BaseModel):
     id: str
     influencer_id: str
-    shoot_id: Optional[str]
     reviewer_name: str
     reviewer_phone: str
-    reviewer_email: str
     rating: int
     review: Optional[str]
     submitted: bool

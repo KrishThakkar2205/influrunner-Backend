@@ -5,7 +5,7 @@ from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from database import get_db
 from sqlalchemy.orm import Session
-from databaseAccess import DeleteCollabNotification, GetDashboardCollabNotification, CollabNotification, RegisterToken, GetInstaMetricPerMedia, GetInstaMediaPortfolioMetric, GetInstaPortfolioMetric, EditProfile, GetPortfolio, SubmitReview, GetReviews, GetDashboard, AddSocialMedia, ValidateReviewToken, AddInfluencers, VerifyOTP, FinalSignup, Login, GetProfile, AddShoot, GetShoots, UpdateShoot, DeleteShoot,AddUpload, GetUploads, GetUpload,UpdateUploads, DeleteUpload, GenerateReview
+from databaseAccess import DeleteCollabNotification, GetDashboardCollabNotification, CollabNotification, RegisterToken, GetInstaMetricPerMedia, GetInstaMediaPortfolioMetric, GetInstaPortfolioMetric, EditProfile, GetPortfolio, SubmitReview, GetReviews, GetDashboard, AddSocialMedia, ValidateReviewToken, AddInfluencers, VerifyOTP, FinalSignup, Login, GetProfile, AddShoot, GetShoots, GetShoot, UpdateShoot, DeleteShoot,AddUpload, GetUploads, GetUpload,UpdateUploads, DeleteUpload, GenerateReview
 from schema.auth import ReviewResponse,SignupInitiate, VerifyOtp, SignupFinal, LoginSchema, ShootCreate, ShootUpdate, UploadCreate, UploadResponse, UploadUpdate, ReviewSubmit
 from maiService import send_otp_email
 from accessToken import CreateAccessToken, VerifyAccessToken
@@ -211,13 +211,13 @@ async def delete_upload(upload_id: str, db: Session = Depends(get_db), token: st
     
     return {"message": "Upload deleted successfully", "status": "success"}
 
-@app.post("/api/reviews/generate/{shoot_id}")
-async def generate_review_link(shoot_id: str, db: Session = Depends(get_db), token: str = Depends(get_current_user)):
+@app.post("/api/reviews/generate")
+async def generate_review_link(brand_name: str,db: Session = Depends(get_db), token: str = Depends(get_current_user)):
     """Generate a unique review link for a completed shoot"""
     user_id = VerifyAccessToken(token)
     if not user_id:
         return Response(status_code=401, content="Invalid token")
-    review_link = GenerateReview(db, user_id, shoot_id)
+    review_link = GenerateReview(db, user_id,brand_name)
     return {"review_link": review_link}
 
 @app.get("/api/reviews/validate/{token}")

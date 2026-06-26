@@ -386,7 +386,6 @@ def SubmitReview(db: Session, token: str, review_data: ReviewSubmit):
 def GetReviews(db: Session, user_id: str):
     reviews = db.query(Reviews).filter(
         Reviews.influencer_id == user_id,
-        Reviews.submitted == True,
         Reviews.deleted == False
     ).order_by(Reviews.submitted_at.desc()).all()
     

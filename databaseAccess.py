@@ -145,7 +145,7 @@ def GetShoots(db: Session, user_id: str, completed: Optional[bool] = None, start
         results = results.filter(Shoots.shoot_date <= end_date)
     results = results.order_by(Shoots.shoot_date.desc()).all()
     response = []
-    for shoot, review_id in results:
+    for shoot in results:
         
         response.append({
         "shoot_date": shoot.shoot_date,

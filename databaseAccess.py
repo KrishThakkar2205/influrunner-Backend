@@ -161,8 +161,7 @@ def GetShoots(db: Session, user_id: str, completed: Optional[bool] = None, start
         "completed": shoot.completed,
         "notes": shoot.notes,
         "updated_at": shoot.updated_at,
-        "deleted_at": shoot.deleted_at,
-        "review_id": review_id
+        "deleted_at": shoot.deleted_at
     })
     # shoots = query.order_by(Shoots.shoot_date.desc()).all()
     # print(type(shoots[0]))

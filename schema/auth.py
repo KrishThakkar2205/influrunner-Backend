@@ -78,7 +78,6 @@ class UploadResponse(BaseModel):
 class ReviewSubmit(BaseModel):
     reviewer_name: str
     reviewer_phone: str
-    reviewer_email: EmailStr
     rating: int = Field(..., ge=1, le=5)
     review: Optional[str] = None
 

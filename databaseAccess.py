@@ -37,8 +37,8 @@ def VerifyOTP(db: Session, email_id: str, otp: int):
         influencer.signup_status = "verified"
         db.commit()
         return True
-    print(influencer.updated_at > datetime.utcnow() - timedelta(minutes=10))
-    print(influencer.signup_otp)
+    # print(influencer.updated_at > datetime.utcnow() - timedelta(minutes=10))
+    # print(influencer.signup_otp)
     return False
 
 def FinalSignup(db: Session, email_id: str, min_price: int, max_price: int, categories: list[str], location: str):
@@ -404,7 +404,7 @@ def AddSocialMedia(db: Session, influencer_id: str, platform_user_id: int,refres
     value = db.add(social_media)
     db.commit()
     db.refresh(social_media)
-    print("Creds Added")
+    # print("Creds Added")
 
 def GetDashboard(db: Session, user_id:str):
     today = datetime.utcnow()  # or datetime.now() if using local time
@@ -526,7 +526,7 @@ def GetInstaPortfolioMetric(db: Session, infleuncer_id: str):
     url = f"https://graph.instagram.com/v25.0/me?fields=username,media_count,followers_count&access_token={credentials.access_token}"
     response = requests.get(url)
     data = response.json()
-    print(data)
+    # print(data)
     response_to_browser["username"] = data["username"]
     response_to_browser["media_count"] = data["media_count"]
     response_to_browser["followers_count"] = data["followers_count"]
@@ -540,7 +540,7 @@ def GetInstaPortfolioMetric(db: Session, infleuncer_id: str):
     url = f"https://graph.instagram.com/v25.0/{id}/insights?metric={metrices}&period=day&since={since}&until={until}&metric_type=total_value&access_token={credentials.access_token}"
     response = requests.get(url)
     data = response.json()
-    print(data)
+    # print(data)
     for item in data['data']:
         response_to_browser[item['name']] = item['total_value']['value']
 
@@ -571,7 +571,7 @@ def GetInstaPortfolioMetric(db: Session, infleuncer_id: str):
     # print("Formatted")
     # print(formatted)
     response_to_browser["engaged_audience_demographics_city"] = formatted
-    print(response_to_browser)
+    # print(response_to_browser)
     return response_to_browser
 
 def GetInstaMetricPerMedia(db: Session, influencer_id: str, media_id: str, media_type: str):
@@ -592,7 +592,7 @@ def GetInstaMetricPerMedia(db: Session, influencer_id: str, media_id: str, media
     # print(data)
     for item in data['data']:
         response_to_browser[item['name']] = item['values'][0]['value']
-    print(response_to_browser)
+    # print(response_to_browser)
     return response_to_browser
 
 def RegisterToken(db: Session, influencer_id: str, device_token: str, device_type: str):

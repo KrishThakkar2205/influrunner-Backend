@@ -254,8 +254,8 @@ async def connect_social_media(request: Request, platform: str, db: Session = De
 async def instagram_redirect(code: str, state: str, db: Session = Depends(get_db)):
     """Handle Instagram OAuth redirect"""
     try:
-        print("Code: ", code)
-        print("State: ", state)
+        # print("Code: ", code)
+        # print("State: ", state)
         influencer_id = state
         # Exchanging the Auth Code for the short lived access token
         url = "https://api.instagram.com/oauth/access_token"
@@ -273,9 +273,9 @@ async def instagram_redirect(code: str, state: str, db: Session = Depends(get_db
         temp_access_token = data.get("access_token")
         platform_user_id = data.get("user_id")
         permission = data.get("permissions")
-        print("Temp Access Token: ", temp_access_token)
-        print("Platform User ID: ", platform_user_id)
-        print("Permissions: ", permission)
+        # print("Temp Access Token: ", temp_access_token)
+        # print("Platform User ID: ", platform_user_id)
+        # print("Permissions: ", permission)
 
         # Exchanging the short lived access token for the long live access token
         url = "https://graph.instagram.com/access_token"
@@ -286,11 +286,11 @@ async def instagram_redirect(code: str, state: str, db: Session = Depends(get_db
         }
         response =  requests.get(url, params=payload)
         data = response.json()
-        print(response.status_code, response.text)
+        # print(response.status_code, response.text)
         access_token = data.get("access_token")
         expires_in_seconds = data.get("expires_in")
-        print("Long Live Access Token: ", access_token)
-        print("Expires In Seconds: ", expires_in_seconds)
+        # print("Long Live Access Token: ", access_token)
+        # print("Expires In Seconds: ", expires_in_seconds)
         expires_in = datetime.utcnow() + timedelta(seconds=expires_in_seconds)
         
         AddSocialMedia(db, influencer_id, platform_user_id, access_token, access_token, expires_in, "instagram")
@@ -365,7 +365,7 @@ async def update_profile(
         async with aiofiles.open(file_path, "wb") as out_file:
             content = await profile_picture.read()
             await out_file.write(content)
-    print(profile_data)
+    # print(profile_data)
     await EditProfile(db, user_id, profile_data)
     return Response(status_code=200, content="Profile updated successfully")
 

@@ -87,6 +87,7 @@ class Reviews(Base):
 
     id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
     influencer_id = Column(String, ForeignKey("influencers.id"), nullable=False)
+    brand_name = Column(String, nullable=True)
     reviewer_name = Column(String, nullable=False)
     reviewer_phone = Column(String, nullable=False)
     rating = Column(Integer, nullable=False)

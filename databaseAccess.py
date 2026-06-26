@@ -374,7 +374,6 @@ def SubmitReview(db: Session, token: str, review_data: ReviewSubmit):
     # Update review with client data
     review.reviewer_name = review_data.reviewer_name
     review.reviewer_phone = review_data.reviewer_phone
-    review.reviewer_email = review_data.reviewer_email
     review.rating = review_data.rating
     review.review = review_data.review
     review.submitted = True

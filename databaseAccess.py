@@ -3,7 +3,7 @@ from sqlalchemy import func, case
 from models import Influencer, Shoots, Uploads, Reviews, Credentials, DeviceTokens, CollabNotifications
 from datetime import datetime, timedelta
 from datetime import date, time
-from fastapi import HTTPException
+from fastapi import HTTPException, Response
 import requests
 from typing import Optional
 from schema.auth import ShootUpdate, UploadCreate, UploadUpdate, ReviewSubmit
@@ -71,7 +71,7 @@ def Login(db: Session, email_id: str, password: str):
         }
     return None
 
-def GetProfile(db: Session, user_id: int):
+def GetProfile(db: Session, user_id: str):
     user = db.query(Influencer).filter(Influencer.id == user_id).first()
     if not user:
         return Response(status_code=404, content="User not found")
@@ -112,7 +112,7 @@ def GetProfile(db: Session, user_id: int):
     
     return user_dict
 
-def AddShoot(db: Session, user_id: int, shoot_date: date, shoot_time: time, location: str, name: str, brand_name: str, notes: str):
+def AddShoot(db: Session, user_id: str, shoot_date: date, shoot_time: time, location: str, name: str, brand_name: str, notes: str):
     new_shoot = Shoots(
         influencer_id=user_id,
         shoot_date=shoot_date,
@@ -168,7 +168,7 @@ def GetShoots(db: Session, user_id: str, completed: Optional[bool] = None, start
     # print(type(shoots[0]))
     return response
 
-def GetShoot(db: Session, user_id: int, shoot_id: int):
+def GetShoot(db: Session, user_id: str, shoot_id: int):
     shoot = db.query(Shoots).filter(
         Shoots.id == shoot_id,
         Shoots.influencer_id == user_id,
@@ -180,7 +180,7 @@ def GetShoot(db: Session, user_id: int, shoot_id: int):
     
     return shoot
 
-def UpdateShoot(db: Session, user_id: int, shoot_id: int, shoot_update: ShootUpdate):
+def UpdateShoot(db: Session, user_id: str, shoot_id: int, shoot_update: ShootUpdate):
     shoot = db.query(Shoots).filter(
         Shoots.id == shoot_id,
         Shoots.influencer_id == user_id,
@@ -205,7 +205,7 @@ def UpdateShoot(db: Session, user_id: int, shoot_id: int, shoot_update: ShootUpd
     
     return shoot
 
-def DeleteShoot(db: Session, user_id: int, shoot_id: int):
+def DeleteShoot(db: Session, user_id: str, shoot_id: int):
     shoot = db.query(Shoots).filter(
         Shoots.id == shoot_id,
         Shoots.influencer_id == user_id,
@@ -222,7 +222,7 @@ def DeleteShoot(db: Session, user_id: int, shoot_id: int):
     
     return shoot
 
-def AddUpload(db: Session, user_id: int, upload: UploadCreate):
+def AddUpload(db: Session, user_id: str, upload: UploadCreate):
     new_upload = Uploads(
         influencer_id=user_id,
         upload_date=upload.upload_date,
@@ -239,7 +239,7 @@ def AddUpload(db: Session, user_id: int, upload: UploadCreate):
     
     return new_upload
 
-def GetUploads(db: Session, user_id: int, completed: Optional[bool] = None, start_date: Optional[date] = None, end_date: Optional[date] = None, platform: Optional[str] = None):
+def GetUploads(db: Session, user_id: str, completed: Optional[bool] = None, start_date: Optional[date] = None, end_date: Optional[date] = None, platform: Optional[str] = None):
     query = db.query(Uploads).filter(
         Uploads.influencer_id == user_id,
         Uploads.deleted == False
@@ -260,7 +260,7 @@ def GetUploads(db: Session, user_id: int, completed: Optional[bool] = None, star
     uploads = query.order_by(Uploads.upload_date.desc()).all()
     return uploads
 
-def GetUpload(db: Session, user_id: int, upload_id: int):
+def GetUpload(db: Session, user_id: str, upload_id: int):
     upload = db.query(Uploads).filter(
         Uploads.id == upload_id,
         Uploads.influencer_id == user_id,
@@ -270,7 +270,7 @@ def GetUpload(db: Session, user_id: int, upload_id: int):
         raise HTTPException(status_code=404, detail="Upload not found")
     return upload
 
-def UpdateUploads(db: Session, user_id: int, upload_id: int, upload_update: UploadUpdate):
+def UpdateUploads(db: Session, user_id: str, upload_id: int, upload_update: UploadUpdate):
     upload = db.query(Uploads).filter(
         Uploads.id == upload_id,
         Uploads.influencer_id == user_id,
@@ -295,7 +295,7 @@ def UpdateUploads(db: Session, user_id: int, upload_id: int, upload_update: Uplo
     
     return upload
 
-def DeleteUpload(db: Session, user_id: int, upload_id: int):
+def DeleteUpload(db: Session, user_id: str, upload_id: int):
     upload = db.query(Uploads).filter(
         Uploads.id == upload_id,
         Uploads.influencer_id == user_id,
@@ -351,14 +351,12 @@ def ValidateReviewToken(db: Session, token: str):
         raise HTTPException(status_code=400, detail="Review already submitted")
     
     # Get shoot and influencer details
-    shoot = db.query(Shoots.name, Shoots.brand_name, Shoots.shoot_date).filter(Shoots.id == review.shoot_id).first()
+    
     influencer = db.query(Influencer.name).filter(Influencer.id == review.influencer_id).first()
     
     return {
         "influencer_name": influencer.name,
-        "shoot_name": shoot.name if shoot.name else "Project",
-        "brand_name": shoot.brand_name,
-        "shoot_date": shoot.shoot_date
+        "brand_name": review.brand_name,
     }
 
 def SubmitReview(db: Session, token: str, review_data: ReviewSubmit):

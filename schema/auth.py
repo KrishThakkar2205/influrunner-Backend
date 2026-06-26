@@ -84,6 +84,7 @@ class ReviewSubmit(BaseModel):
 class ReviewResponse(BaseModel):
     id: str
     influencer_id: str
+    brand_name: str
     reviewer_name: str
     reviewer_phone: str
     rating: int

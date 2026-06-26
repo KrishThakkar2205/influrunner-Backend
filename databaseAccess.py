@@ -127,12 +127,9 @@ def AddShoot(db: Session, user_id: int, shoot_date: date, shoot_time: time, loca
     db.refresh(new_shoot)
     return new_shoot
 
-def GetShoots(db: Session, user_id: int, completed: Optional[bool] = None, start_date: Optional[date] = None, end_date: Optional[date] = None):
+def GetShoots(db: Session, user_id: str, completed: Optional[bool] = None, start_date: Optional[date] = None, end_date: Optional[date] = None):
     results = db.query(
-        Shoots,
-        Reviews.id.label("review_id")
-    ).outerjoin(
-        Reviews, Reviews.shoot_id == Shoots.id
+        Shoots
     ).filter(
         Shoots.influencer_id == user_id,
         Shoots.deleted == False
@@ -315,37 +312,26 @@ def DeleteUpload(db: Session, user_id: int, upload_id: int):
     
     return upload
 
-def GenerateReview(db: Session, user_id: int, shoot_id: int):
-    shoot = db.query(Shoots).filter(
-        Shoots.id == shoot_id,
-        Shoots.influencer_id == user_id,
-        Shoots.deleted == False
+def GenerateReview(db: Session, user_id: str,brand_name: str):
+    influencer = db.query(Influencer).filter(
+        Influencer.id == user_id,
+        Influencer.deleted == False
     ).first()
     
-    if not shoot:
-        raise HTTPException(status_code=404, detail="Shoot not found")
+    if not influencer:
+        raise HTTPException(status_code=404, detail="Influencer not found")
     
-    if not shoot.completed:
-        raise HTTPException(status_code=400, detail="Shoot must be completed before generating review link")
-    
-    # Generate unique token
-    # token = f"rev_{secrets.token_urlsafe(32)}"
-    
-    # Create review entry
     review = Reviews(
         influencer_id=user_id,
-        shoot_id=shoot_id,
+        brand_name = brand_name,
         reviewer_name="",  # Will be filled when client submits
         reviewer_phone="",
-        reviewer_email="",
         rating=0,
         submitted=False
     )
-    shoot.review_generated = True
     db.add(review)
     db.commit()
     db.refresh(review)
-    db.refresh(shoot)
     
     # Update review ID to use as token (or store token separately)
     review_link = f"/review/{review.id}"

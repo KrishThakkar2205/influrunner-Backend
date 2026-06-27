@@ -5,7 +5,7 @@ from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from database import get_db
 from sqlalchemy.orm import Session
-from databaseAccess import DeleteCollabNotification, GetDashboardCollabNotification, CollabNotification, RegisterToken, GetInstaMetricPerMedia, GetInstaMediaPortfolioMetric, GetInstaPortfolioMetric, EditProfile, GetPortfolio, SubmitReview, GetReviews, GetDashboard, AddSocialMedia, ValidateReviewToken, AddInfluencers, VerifyOTP, FinalSignup, Login, GetProfile, AddShoot, GetShoots, GetShoot, UpdateShoot, DeleteShoot,AddUpload, GetUploads, GetUpload,UpdateUploads, DeleteUpload, GenerateReview
+from databaseAccess import DeleteCollabNotification, GetDashboardCollabNotification, CollabNotification, RegisterToken, GetInstaMetricPerMedia, GetInstaMediaPortfolioMetric, GetInstaPortfolioMetric, EditProfile, GetPortfolio, SubmitReview, GetReviews, GetDashboard, AddSocialMedia, ValidateReviewToken, AddInfluencers, VerifyOTP, FinalSignup, Login, GetProfile, AddShoot, GetShoots, GetShoot, UpdateShoot, DeleteShoot,AddUpload, GetUploads, GetUpload,UpdateUploads, DeleteUpload, GenerateReview, GetSitemapData
 from schema.auth import ReviewResponse,SignupInitiate, VerifyOtp, SignupFinal, LoginSchema, ShootCreate, ShootUpdate, UploadCreate, UploadResponse, UploadUpdate, ReviewSubmit
 from maiService import send_otp_email
 from accessToken import CreateAccessToken, VerifyAccessToken
@@ -53,6 +53,22 @@ def start_scheduler():
 @app.on_event("shutdown")
 def stop_scheduler():
     scheduler.shutdown()
+
+
+@app.get("/api/portfolio/sitemap-data")
+async def get_sitemap_data(db: Session = Depends(get_db)):
+    try:
+        data = GetSitemapData(db)
+        response = []
+        for item in data:
+            response.append({
+                "id": item.id,
+                "created_at": item.created_at
+            })
+        return response
+    except Exception as e:
+        print(e)
+        return Response(status_code=500, content=str(e))
 
 @app.post("/auth/signup-initiate")
 async def signup_initiate(request: SignupInitiate, db: Session = Depends(get_db)):

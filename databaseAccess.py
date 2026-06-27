@@ -644,3 +644,6 @@ def DeleteCollabNotification(db: Session, notification_id: str):
     notification.deleted = True
     db.commit()
     return True
+
+def GetSitemapData(db: Session):
+    return db.query(Influencer.id,Influencer.created_at).all()

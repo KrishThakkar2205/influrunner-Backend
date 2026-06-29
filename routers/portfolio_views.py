@@ -25,10 +25,10 @@ async def get_city_from_ip(ip: str):
         return "Unknown"
 
 
-def is_unique_visit(db: Session, portfolio_id: int, fingerprint_hash: str) -> bool:
+def is_unique_visit(db: Session, portfolio_id: str, fingerprint_hash: str) -> bool:
     cutoff = datetime.utcnow() - timedelta(hours=24)
     portfolio_view = db.query(PortfolioViews).filter(
-        PortfolioViews.portfolio_id == portfolio_id,
+        PortfolioViews.influencer_id == portfolio_id,
         PortfolioViews.fingerprint_hash == fingerprint_hash,
         PortfolioViews.viewed_at >= cutoff
     ).first()
@@ -41,21 +41,27 @@ async def track_portfolio_view(request: Request, db: Session = Depends(get_db)):
     try:
         data = await request.json()
         client_ip = (
-            request.headers.get("x-forwarded-for","").split(",")[0].strip()
+            request.headers.get("x-forwarded-for", "").split(",")[0].strip()
             or request.client.host
         )
-        ip_hash = hashlib.sha256(client_ip.encode()).hexdigest()
         city = await get_city_from_ip(client_ip)
-        unique = is_unique_visit(db, data["portfolio_id"], data["fingerprint_hash"])
+        
+        portfolio_id = data.get("portfolio_id")
+        fingerprint_hash = data.get("fingerprint_hash")
+        utm_source = data.get("utm_source", "direct")
+        referrer = data.get("referrer", "direct")
+        device_type = data.get("device_type", "desktop")
+        
+        unique = is_unique_visit(db, portfolio_id, fingerprint_hash)
         
         view = PortfolioViews(
-            influencer_id=data["influencer_id"],
-            portfolio_id=data["portfolio_id"],
-            fingerprint_hash=data["fingerprint_hash"],
-            ip_hash=ip_hash,
-            device_type=data["device_type"],
+            influencer_id=portfolio_id,
+            fingerprint_hash=fingerprint_hash,
+            utm_source=utm_source,
+            referrer=referrer,
+            device_type=device_type,
             city=city,
-            unique=unique,
+            is_unique=unique,
             viewed_at=datetime.utcnow()
         )
         db.add(view)

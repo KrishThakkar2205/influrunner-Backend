@@ -23,11 +23,13 @@ from backgound_workers.update_creds import update_creds
 from backgound_workers.welcome import connect_instagram, add_to_calender_remainder
 import firebase.firebase_config
 from backgound_workers.whatsapp_shoot_upload_reaminder import send_shoot_reminder_bfr_2hr, send_shoot_reminder_bfr_1hr, upload_remainder_before_2hr, upload_remainder_before_1hr
-
+from routers.portfolio_views import router as portfolio_views_router
 
 UPLOAD_DIR = "uploads/profile_pictures"
 
 app = FastAPI()
+app.include_router(portfolio_views_router)
+
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 app.add_middleware(
     CORSMiddleware,
@@ -53,6 +55,7 @@ def start_scheduler():
 @app.on_event("shutdown")
 def stop_scheduler():
     scheduler.shutdown()
+
 
 
 @app.get("/api/portfolio/sitemap-data")

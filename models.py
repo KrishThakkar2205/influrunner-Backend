@@ -125,3 +125,16 @@ class CollabNotifications(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     deleted = Column(Boolean, default=False)
     deleted_at = Column(DateTime, nullable=True)
+
+class PortfolioViews(Base):
+    __tablename__ = "portfolio_views"
+
+    id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    influencer_id = Column(String, ForeignKey("influencers.id"), nullable=False)
+    fingerprint_hash = Column(String, nullable=False)
+    utm_source = Column(String, nullable=True)
+    referrer = Column(String, nullable=True)
+    device_type = Column(String, nullable=True)
+    city = Column(String, nullable=True)
+    is_unique = Column(Boolean, default=True)
+    viewed_at = Column(DateTime, default=datetime.utcnow)

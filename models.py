@@ -138,3 +138,15 @@ class PortfolioViews(Base):
     city = Column(String, nullable=True)
     is_unique = Column(Boolean, default=True)
     viewed_at = Column(DateTime, default=datetime.utcnow)
+
+class Admins(Base):
+    __tablename__ = "admins"
+    id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    email_id = Column(String, unique=True, nullable=False)
+    password = Column(String, nullable=False)
+    role = Column(String, nullable=False)
+    name = Column(String, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    accessed_at = Column(DateTime, default=datetime.utcnow)
+    deleted = Column(Boolean, default=False)
+    deleted_at = Column(DateTime, nullable=True)

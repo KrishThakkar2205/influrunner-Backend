@@ -565,15 +565,29 @@ def GetInstaPortfolioMetric(db: Session, infleuncer_id: str):
         }
         for item in top_cities
     ]
+    response_to_browser["engaged_audience_demographics_city"] = formatted
     url = f"https://graph.instagram.com/v25.0/{id}/insights?metric=engaged_audience_demographics&period=lifetime&timeframe=this_month&breakdown=age&metric_type=total_value&access_token={credentials.access_token}"
     response = requests.get(url)
     data = response.json()
-    print(data)
+    breakdown = data["data"][0]["total_value"]["breakdowns"][0]["results"]
+    total = sum(item["value"] for item in breakdown)
+    formatted = [
+        {
+            "age": item["dimension_values"][0],
+            "count": item["value"],
+            "percentage": round((item["value"] / total) * 100, 2) if total else 0
+        }
+        for item in breakdown
+    ]
+    response_to_browser["engaged_audience_age_demographics"] = {
+        "total_engaged_audience": total,
+        "age_distribution": formatted
+    }
     # print(data)
     # print("Formatted")
     # print(formatted)
-    response_to_browser["engaged_audience_demographics_city"] = formatted
-    # print(response_to_browser)
+    
+    print(response_to_browser)
     return response_to_browser
 
 def GetInstaMetricPerMedia(db: Session, influencer_id: str, media_id: str, media_type: str):

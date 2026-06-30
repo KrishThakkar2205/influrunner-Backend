@@ -26,7 +26,7 @@ async def get_city_from_ip(ip: str):
 
 
 def is_unique_visit(db: Session, portfolio_id: str, fingerprint_hash: str) -> bool:
-    cutoff = datetime.utcnow() - timedelta(hours=24)
+    cutoff = datetime.utcnow() - timedelta(hours=720)
     portfolio_view = db.query(PortfolioViews).filter(
         PortfolioViews.influencer_id == portfolio_id,
         PortfolioViews.fingerprint_hash == fingerprint_hash,

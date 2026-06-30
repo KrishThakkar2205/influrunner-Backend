@@ -51,7 +51,7 @@ def get_portfolio_viewed_source(profile_id : str, db: Session = Depends(get_db),
         PortfolioViews.utm_source.label("source"),
         func.count(PortfolioViews.id).label("views")
     ).filter(
-        PortfolioViews.portfolio_id == profile_id,
+        PortfolioViews.influencer_id == profile_id,
         PortfolioViews.viewed_at >= month_ago
     ).group_by(
         PortfolioViews.utm_source

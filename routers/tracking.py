@@ -20,7 +20,7 @@ def get_portoflio_summary(profile_id : str, db: Session = Depends(get_db), token
     month_ago = now - timedelta(days=30)
 
     base_query = db.query(PortfolioViews).filter(
-        PortfolioViews.portfolio_id == profile_id,
+        PortfolioViews.influencer_id == profile_id,
         PortfolioViews.viewed_at >= month_ago
     )
 

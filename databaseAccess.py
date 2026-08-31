@@ -524,11 +524,11 @@ def GetInstaPortfolioMetric(db: Session, infleuncer_id: str):
     url = f"https://graph.instagram.com/v25.0/me?fields=username,media_count,followers_count&access_token={credentials.access_token}"
     response = requests.get(url)
     data = response.json()
-    print(data)
+    # print(data)
     response_to_browser["username"] = data["username"]
     response_to_browser["media_count"] = data["media_count"]
     response_to_browser["followers_count"] = data["followers_count"]
-    # print(response_to_browser)
+    print(response_to_browser)
     #Account Metrices
     metrices = "accounts_engaged,reach,total_interactions,views"
     # 30 days from now
@@ -541,32 +541,35 @@ def GetInstaPortfolioMetric(db: Session, infleuncer_id: str):
     print(data)
     for item in data['data']:
         response_to_browser[item['name']] = item['total_value']['value']
+    try:
+        url = f"https://graph.instagram.com/v25.0/{id}/insights?metric=engaged_audience_demographics&period=lifetime&timeframe=this_month&breakdown=city&metric_type=total_value&access_token={credentials.access_token}"
+        response = requests.get(url)
+        data = response.json()
+        print(data)
+        results = (
+            data["data"][0]
+            ["total_value"]["breakdowns"][0]
+            ["results"]
+        )
+        total = sum(item["value"] for item in results)
 
-    url = f"https://graph.instagram.com/v25.0/{id}/insights?metric=engaged_audience_demographics&period=lifetime&timeframe=this_month&breakdown=city&metric_type=total_value&access_token={credentials.access_token}"
-    response = requests.get(url)
-    data = response.json()
-    print(data)
-    results = (
-        data["data"][0]
-        ["total_value"]["breakdowns"][0]
-        ["results"]
-    )
-    total = sum(item["value"] for item in results)
-
-    top_cities = sorted(
-        results,
-        key=lambda x: x["value"],
-        reverse=True
-    )[:5]
-    
-    formatted = [
-        {
-            "city": item["dimension_values"][0],
-            "percentage": round((item["value"] / total) * 100, 2)
-        }
-        for item in top_cities
-    ]
-    response_to_browser["engaged_audience_demographics_city"] = formatted
+        top_cities = sorted(
+            results,
+            key=lambda x: x["value"],
+            reverse=True
+        )[:5]
+        
+        formatted = [
+            {
+                "city": item["dimension_values"][0],
+                "percentage": round((item["value"] / total) * 100, 2)
+            }
+            for item in top_cities
+        ]
+        response_to_browser["engaged_audience_demographics_city"] = formatted
+    except Exception as e:
+        print(e)
+        response_to_browser["engaged_audience_demographics_city"] = []
     url = f"https://graph.instagram.com/v25.0/{id}/insights?metric=engaged_audience_demographics&period=lifetime&timeframe=this_month&breakdown=age&metric_type=total_value&access_token={credentials.access_token}"
     response = requests.get(url)
     data = response.json()

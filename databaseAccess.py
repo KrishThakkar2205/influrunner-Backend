@@ -545,6 +545,7 @@ def GetInstaPortfolioMetric(db: Session, infleuncer_id: str):
     url = f"https://graph.instagram.com/v25.0/{id}/insights?metric=engaged_audience_demographics&period=lifetime&timeframe=this_month&breakdown=city&metric_type=total_value&access_token={credentials.access_token}"
     response = requests.get(url)
     data = response.json()
+    print(data)
     results = (
         data["data"][0]
         ["total_value"]["breakdowns"][0]

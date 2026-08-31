@@ -20,7 +20,7 @@ import os
 import aiofiles
 from apscheduler.schedulers.background import BackgroundScheduler
 from backgound_workers.update_creds import update_creds
-from backgound_workers.welcome import connect_instagram, add_to_calender_remainder
+from backgound_workers.welcome import connect_instagram, add_to_calender_remainder, collab_request
 import firebase.firebase_config
 from backgound_workers.whatsapp_shoot_upload_reaminder import send_shoot_reminder_bfr_2hr, send_shoot_reminder_bfr_1hr, upload_remainder_before_2hr, upload_remainder_before_1hr
 from routers.portfolio_views import router as portfolio_views_router
@@ -442,6 +442,7 @@ async def collab_notification(request: Request, db: Session = Depends(get_db)):
     business_info = data.get("business_info")
     notes = data.get("notes")
     if CollabNotification(db, influencer_id, brand_name, person_name, person_phone, person_email, budget, business_info, notes):
+        collab_request(brand_name, influencer_id)
         return JSONResponse(status_code=200, content={"message": "Collab notification sent successfully"})
     return JSONResponse(status_code=400, content={"message": "Collab notification not sent"})
 

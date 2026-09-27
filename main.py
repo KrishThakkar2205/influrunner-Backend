@@ -470,8 +470,8 @@ async def forget_password(request: Request, db: Session = Depends(get_db)):
     data = await request.json()
     email = data.get("email")
     if not ForgetPassword(db, email):
-        return Response(status_code=200, content="USER NOT FOUND")
-    return Response(status_code=400, content="OTP Sent on Email")
+        return Response(status_code=404, content="USER NOT FOUND")
+    return Response(status_code=200, content="OTP Sent on Email")
 
 @app.post("/api/verify-forget-otp")
 async def verify_forget_otp(request: Request, db: Session = Depends(get_db)):

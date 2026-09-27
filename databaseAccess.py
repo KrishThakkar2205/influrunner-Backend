@@ -688,7 +688,7 @@ def ForgetPassword(db: Session, influencer_email:str):
         return False
     verification_code = str(random.randint(100000, 999999))
     influencer.signup_otp = verification_code
-    influencer.updated_at = datetime.utcnow()
+    # influencer.updated_at = datetime.utcnow()
     db.commit()
     send_otp_email(influencer.email_id, verification_code)
     return True
@@ -698,6 +698,7 @@ def ResetPassword(db: Session, influencer_email:str, password:str):
     if not influencer:
         return False
     influencer.password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-    influencer.updated_at = datetime.utcnow()
+    # influencer.updated_at = datetime.utcnow()
+    influencer.signup_status = "completed"
     db.commit()
     return True

@@ -687,7 +687,7 @@ def ForgetPassword(db: Session, influencer_email:str):
     if not influencer:
         return False
     verification_code = str(random.randint(100000, 999999))
-    influencer.otp = verification_code
+    influencer.signup_otp = verification_code
     influencer.updated_at = datetime.utcnow()
     db.commit()
     send_otp_email(influencer.email_id, verification_code)

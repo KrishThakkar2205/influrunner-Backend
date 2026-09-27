@@ -8,6 +8,8 @@ import requests
 from typing import Optional
 from schema.auth import ShootUpdate, UploadCreate, UploadUpdate, ReviewSubmit
 import bcrypt
+import random
+from maiService import send_otp_email
 
 def AddInfluencers(db: Session, name: str, email_id: str, phone_number: str, password: str, otp: int):
     influencer = db.query(Influencer).filter(Influencer.email_id == email_id).first()
@@ -678,3 +680,24 @@ def DeleteCollabNotification(db: Session, notification_id: str):
 
 def GetSitemapData(db: Session):
     return db.query(Influencer.id,Influencer.created_at).all()
+
+
+def ForgetPassword(db: Session, influencer_email:str):
+    influencer = db.query(Influencer).filter(Influencer.email == influencer_email).first()
+    if not influencer:
+        return False
+    verification_code = str(random.randint(100000, 999999))
+    influencer.otp = verification_code
+    influencer.updated_at = datetime.utcnow()
+    db.commit()
+    send_otp_email(influencer.email_id, verification_code)
+    return True
+
+def ResetPassword(db: Session, influencer_email:str, password:str):
+    influencer = db.query(Influencer).filter(Influencer.email == influencer_email).first()
+    if not influencer:
+        return False
+    influencer.password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    influencer.updated_at = datetime.utcnow()
+    db.commit()
+    return True

@@ -5,7 +5,7 @@ from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from database import get_db
 from sqlalchemy.orm import Session
-from databaseAccess import DeleteCollabNotification, GetDashboardCollabNotification, CollabNotification, RegisterToken, GetInstaMetricPerMedia, GetInstaMediaPortfolioMetric, GetInstaPortfolioMetric, EditProfile, GetPortfolio, SubmitReview, GetReviews, GetDashboard, AddSocialMedia, ValidateReviewToken, AddInfluencers, VerifyOTP, FinalSignup, Login, GetProfile, AddShoot, GetShoots, GetShoot, UpdateShoot, DeleteShoot,AddUpload, GetUploads, GetUpload,UpdateUploads, DeleteUpload, GenerateReview, GetSitemapData
+from databaseAccess import ResetPassword ,ForgetPassword, DeleteCollabNotification, GetDashboardCollabNotification, CollabNotification, RegisterToken, GetInstaMetricPerMedia, GetInstaMediaPortfolioMetric, GetInstaPortfolioMetric, EditProfile, GetPortfolio, SubmitReview, GetReviews, GetDashboard, AddSocialMedia, ValidateReviewToken, AddInfluencers, VerifyOTP, FinalSignup, Login, GetProfile, AddShoot, GetShoots, GetShoot, UpdateShoot, DeleteShoot,AddUpload, GetUploads, GetUpload,UpdateUploads, DeleteUpload, GenerateReview, GetSitemapData
 from schema.auth import ReviewResponse,SignupInitiate, VerifyOtp, SignupFinal, LoginSchema, ShootCreate, ShootUpdate, UploadCreate, UploadResponse, UploadUpdate, ReviewSubmit
 from maiService import send_otp_email
 from accessToken import CreateAccessToken, VerifyAccessToken
@@ -463,6 +463,35 @@ async def delete_collab_notification(notification_id: str, db: Session = Depends
     if DeleteCollabNotification(db, notification_id):
         return Response(status_code=200, content="Collab notification deleted successfully")
     return Response(status_code=400, content="Collab notification not deleted")
+
+@app.post("/api/forget-password")
+async def forget_password(request: Request, db: Session = Depends(get_db)):
+    """Forget password"""
+    data = await request.json()
+    email = data.get("email")
+    if ForgetPassword(db, email):
+        return Response(status_code=200, content="USER NOT FOUND")
+    return Response(status_code=400, content="OTP Sent on Email")
+
+@app.post("/api/verify-forget-otp")
+async def verify_forget_otp(request: Request, db: Session = Depends(get_db)):
+    """Verify forget OTP"""
+    data = await request.json()
+    email = data.get("email")
+    otp = data.get("otp")
+    if VerifyOTP(db, email, otp):
+        return Response(status_code=200, content="OTP verified successfully")
+    return Response(status_code=400, content="OTP not verified")
+
+@app.post("/api/reset-password")
+async def reset_password(request: Request, db: Session = Depends(get_db)):
+    """Reset password"""
+    data = await request.json()
+    email = data.get("email")
+    password = data.get("password")
+    if ResetPassword(db, email, password):
+        return Response(status_code=200, content="Password reset successfully")
+    return Response(status_code=400, content="Password reset failed")
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000)

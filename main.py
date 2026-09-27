@@ -469,7 +469,7 @@ async def forget_password(request: Request, db: Session = Depends(get_db)):
     """Forget password"""
     data = await request.json()
     email = data.get("email")
-    if ForgetPassword(db, email):
+    if not ForgetPassword(db, email):
         return Response(status_code=200, content="USER NOT FOUND")
     return Response(status_code=400, content="OTP Sent on Email")
 

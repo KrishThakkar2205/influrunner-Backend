@@ -683,7 +683,7 @@ def GetSitemapData(db: Session):
 
 
 def ForgetPassword(db: Session, influencer_email:str):
-    influencer = db.query(Influencer).filter(Influencer.email == influencer_email).first()
+    influencer = db.query(Influencer).filter(Influencer.email_id == influencer_email).first()
     if not influencer:
         return False
     verification_code = str(random.randint(100000, 999999))
@@ -694,10 +694,10 @@ def ForgetPassword(db: Session, influencer_email:str):
     return True
 
 def ResetPassword(db: Session, influencer_email:str, password:str):
-    influencer = db.query(Influencer).filter(Influencer.email == influencer_email).first()
+    influencer = db.query(Influencer).filter(Influencer.email_id == influencer_email).first()
     if not influencer:
         return False
-    influencer.password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    influencer.password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     influencer.updated_at = datetime.utcnow()
     db.commit()
     return True

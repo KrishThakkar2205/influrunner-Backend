@@ -12,22 +12,6 @@ router = APIRouter(
     tags=["Creator Review"]
 )
 
-@router.post("/generate",tags=["Creator Review"])
-async def portfolio_view(req:Request,creator_name: str, db:Session = Depends(get_db)):
-    try:
-        review = CreatorReviewsOnInfluRunner(
-            creator_name=creator_name
-        )
-        db.add(review)
-        db.commit()
-        db.refresh(review)
-        review_id = review.id
-        review_link = f"/creatorreview/{review_id}"
-        return {"review_link":review_link, "status_code":200}
-    except Exception as e:
-        print(e)
-        return {"status_code":500, "error":str(e)}
-
 @router.get("/validate/review/creator")
 async def validate_review_link(req:Request,review_id: str, db:Session = Depends(get_db)):
     try:

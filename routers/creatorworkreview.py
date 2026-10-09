@@ -15,7 +15,7 @@ router = APIRouter(
 @router.get("/validate/review/creator")
 async def validate_review_link(req:Request,review_id: str, db:Session = Depends(get_db)):
     try:
-        review = db.query(CreatorReviewsOnInfluRunner).filter(CreatorReviewsOnInfluRunner.id == review_id).first()
+        review = db.query(CreatorReviewsOnInfluRunner).filter(CreatorReviewsOnInfluRunner.id == review_id, CreatorReviewsOnInfluRunner.status == "pending").first()
         if review:
             return Response(status_code = 200, content="Review is valid")
         return Response(status_code=404, content="Review not found")

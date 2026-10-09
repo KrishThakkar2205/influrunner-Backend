@@ -143,10 +143,27 @@ class Admins(Base):
     __tablename__ = "admins"
     id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
     email_id = Column(String, unique=True, nullable=False)
-    password = Column(String, nullable=False)
+    password_hash = Column(String, nullable=False)
     role = Column(String, nullable=False)
     name = Column(String, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     accessed_at = Column(DateTime, default=datetime.utcnow)
     deleted = Column(Boolean, default=False)
     deleted_at = Column(DateTime, nullable=True)
+
+class CreatorReviewsOnInfluRunner(Base):
+    __tablename__ = "creator_reviews_on_influ_runner"
+
+    id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    status = Column(String, nullable=False, default="pending")
+    rating = Column(Integer, nullable=True)
+    review = Column(String, nullable=True)
+    creator_name = Column(String, nullable=False)
+    positives = Column(String, nullable=True)
+    negatives = Column(String, nullable=True)
+    submitted = Column(Boolean, default=False)
+    submitted_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    deleted = Column(Boolean, default=False)
+    deleted_at = Column(DateTime, nullable=True)
+    

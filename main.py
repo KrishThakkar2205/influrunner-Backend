@@ -25,12 +25,15 @@ import firebase.firebase_config
 from backgound_workers.whatsapp_shoot_upload_reaminder import send_shoot_reminder_bfr_2hr, send_shoot_reminder_bfr_1hr, upload_remainder_before_2hr, upload_remainder_before_1hr
 from routers.portfolio_views import router as portfolio_views_router
 from routers.tracking import router as tracking_router
+from routers.creatorworkreview import router as creatorworkreview_router
+from routers.admin import router as admin_router
 
 UPLOAD_DIR = "uploads/profile_pictures"
 
 app = FastAPI()
 app.include_router(portfolio_views_router)
 app.include_router(tracking_router)
+app.include_router(creatorworkreview_router)
 
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 app.add_middleware(
